@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  password  String
+  name      String?
+  points    Int     @default(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  downloads Download[]
+  payments  Payment[]
+
+  @@map("users")
+}
+
+model Category {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  pointsCost  Int    @default(10)
+  description String?
+
+  resources Resource[]
+
+  @@map("categories")
+}
+
+model Resource {
+  id          Int     @id @default(autoincrement())
+  title       String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  description String?
+  mainLink    String
+  password    String?
+  backupLink1 String?
+  backupLink2 String?
+  source      String? // 'baidu', 'quark', etc
+  pointsCost  Int     @default(10)
+  downloads   Int     @default(0)
+  isNew       Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  downloadRecords Download[]
+
+  @@map("resources")
+}
+
+model Download {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  resourceId Int
+  pointsSpent Int
+  downloadedAt DateTime @default(now())
+
+  @@map("downloads")
+}
+
+model Payment {
+  id            Int     @id @default(autoincrement())
+  user          User    @relation(fields: [userId], references: [id])
+  userId        Int
+  amount        Float
+  pointsAdded   Int
+  paymentMethod String // 'wechat', 'alipay'
+  status        String @default("pending") // 'pending', 'success', 'failed'
+  transactionId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("payments")
+}
+
+model ImportLog {
+  id           Int     @id @default(autoincrement())
+  totalCount   Int
+  successCount Int
+  failedCount  Int
+  importData   Json?
+  createdAt    DateTime @default(now())
+
+  @@map("import_logs")
+}
