@@ -11,18 +11,60 @@
 - ✅ 资源搜索和筛选
 - ✅ 积分系统（注册赠送100点）
 - ✅ 下载记录统计
-- 🔄 微信/支付宝支付集成（开发中）
+- ✅ **Ping++ 支付集成** (微信/支付宝支付) - 已完成！
 - 🔄 后台管理系统（开发中）
 
 ## 技术栈
 
-- **前端**: Next.js 14+ (App Router)
-- **后端**: Next.js API Routes
-- **数据库**: PostgreSQL (Vercel Postgres)
-- **ORM**: Prisma
+- **前端**: React 19 + Next.js 16 (App Router)
+- **后端**: Next.js API Routes (Serverless)
+- **数据库**: PostgreSQL (Neon)
+- **ORM**: Prisma v5
 - **认证**: JWT + bcryptjs
-- **样式**: Tailwind CSS
+- **样式**: Tailwind CSS v4
+- **支付**: Ping++ 聚合支付 API
 - **部署**: Vercel
+
+## 🚀 支付系统 (新功能)
+
+本项目现已集成 **Ping++ 聚合支付**，支持：
+
+### 支持的支付方式
+- ✅ 微信支付（扫码支付）
+- ✅ 支付宝（扫码支付）
+- ✅ 银行卡支付（可选）
+
+### 关键特性
+- **智能降级**: 无凭证时自动使用模拟二维码（开发友好）
+- **生产就绪**: 完整的 Webhook 处理和幂等性控制
+- **安全可靠**: HMAC-SHA256 签名验证、JWT 认证
+- **易于扩展**: 模块化设计，支持添加更多支付方式
+
+### 快速开始支付功能
+
+```bash
+# 1. 本地开发（无需配置）
+npm run dev
+# 访问 http://localhost:3000/recharge 使用模拟二维码
+
+# 2. 生产部署（获得凭证后）
+# 在 Vercel 添加环境变量
+PING_APP_ID=sk_live_xxx
+PING_API_KEY=sk_live_xxx
+PING_WEBHOOK_KEY=whsec_xxx
+```
+
+详见 [PINGPP_SETUP_GUIDE.md](./PINGPP_SETUP_GUIDE.md) 和 [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md)
+
+## 文档导航
+
+| 文档 | 说明 |
+|------|------|
+| [PINGPP_SETUP_GUIDE.md](./PINGPP_SETUP_GUIDE.md) | Ping++ 快速开始和常见问题 |
+| [PINGPP_INTEGRATION.md](./PINGPP_INTEGRATION.md) | 完整的集成指南 |
+| [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md) | 生产部署检查清单 |
+| [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) | 实现总结报告 |
+| [ARCHITECTURE_OVERVIEW.md](./ARCHITECTURE_OVERVIEW.md) | 系统架构概览 |
 
 ## 快速开始
 
@@ -38,18 +80,16 @@ npm install
 
 ```env
 # Database
-POSTGRES_PRISMA_URL=your_database_url
-POSTGRES_URL_NON_POOLING=your_database_url
+DATABASE_URL=your_neon_database_url
 
 # NextAuth
 NEXTAUTH_SECRET=your-secret-key
 NEXTAUTH_URL=http://localhost:3000
 
-# Payment
-WECHAT_APPID=
-WECHAT_SECRET=
-ALIPAY_APPID=
-ALIPAY_PRIVATE_KEY=
+# Ping++ Payment Gateway (可选，本地开发无需配置)
+PING_APP_ID=
+PING_API_KEY=
+PING_WEBHOOK_KEY=
 
 # App
 NEXT_PUBLIC_APP_NAME=安全资源分享网
@@ -76,132 +116,162 @@ npm run dev
 ```
 safety-resources/
 ├── app/
-│   ├── api/                    # API 路由
-│   │   ├── auth/              # 认证相关
-│   │   ├── resources/         # 资源相关
-│   │   ├── categories/        # 分类相关
-│   │   └── payments/          # 支付相关
-│   ├── admin/                 # 管理后台
-│   │   └── import/            # 资源导入
-│   ├── resources/             # 资源浏览页面
-│   ├── login/                 # 登录页面
-│   ├── register/              # 注册页面
-│   ├── layout.tsx             # 根布局
-│   ├── page.tsx               # 首页
-│   └── globals.css            # 全局样式
+│   ├── api/                           # API 路由
+│   │   ├── auth/                      # 认证相关
+│   │   │   ├── login/route.ts
+│   │   │   └── register/route.ts
+│   │   ├── resources/                 # 资源相关
+│   │   │   └── [id]/route.ts
+│   │   ├── categories/                # 分类相关
+│   │   │   └── route.ts
+│   │   └── payments/                  # 🆕 支付相关
+│   │       ├── initiate/route.ts      # 支付初始化
+│   │       ├── callback/route.ts      # Webhook 回调
+│   │       └── status/[paymentId]/    # 状态查询
+│   ├── resources/                     # 资源浏览页面
+│   ├── recharge/                      # 积分充值页面
+│   ├── login/                         # 登录页面
+│   ├── register/                      # 注册页面
+│   ├── layout.tsx                     # 根布局
+│   ├── page.tsx                       # 首页
+│   └── globals.css                    # 全局样式
 ├── lib/
-│   └── resourceParser.ts      # 资源解析工具
+│   ├── auth.ts                        # 认证工具
+│   └── pingpp.ts                      # 🆕 Ping++ API 客户端
 ├── prisma/
-│   └── schema.prisma          # 数据库 schema
-├── public/                    # 静态资源
-├── .env.local                 # 环境变量
-├── next.config.ts             # Next.js 配置
-├── tailwind.config.ts         # Tailwind 配置
-├── tsconfig.json              # TypeScript 配置
-└── package.json               # 项目依赖
+│   └── schema.prisma                  # 数据库 schema
+├── scripts/
+│   ├── init-data.ts                   # 数据初始化脚本
+│   └── init-data.sql                  # SQL 初始化数据
+├── PINGPP_*.md                        # 🆕 支付文档
+└── package.json                       # 项目依赖
 ```
 
 ## 数据库设计
 
 ### 用户表 (users)
+```
 - id: 用户ID
 - email: 邮箱（唯一）
 - password: 密码哈希
-- name: 用户名
 - points: 积分余额
 - createdAt: 创建时间
 - updatedAt: 更新时间
+```
 
-### 分类表 (categories)
-- id: 分类ID
-- name: 分类名称
-- pointsCost: 默认消耗点数
-- description: 描述
-
-### 资源表 (resources)
-- id: 资源ID
-- title: 标题
-- categoryId: 分类ID
-- description: 描述
-- mainLink: 主链接
-- password: 提取码
-- backupLink1/2: 备用链接
-- source: 来源（baidu/quark等）
-- pointsCost: 消耗点数
-- downloads: 下载次数
-- isNew: 是否新资源
-- createdAt: 创建时间
-
-### 下载记录表 (downloads)
-- id: 记录ID
-- userId: 用户ID
-- resourceId: 资源ID
-- pointsSpent: 消耗点数
-- downloadedAt: 下载时间
-
-### 支付表 (payments)
+### 支付表 (payments) 🆕
+```
 - id: 支付ID
 - userId: 用户ID
-- amount: 金额
+- amount: 金额（元）
 - pointsAdded: 增加的点数
-- paymentMethod: 支付方式
-- status: 支付状态
-- transactionId: 交易ID
+- paymentMethod: 支付方式 (wechat/alipay)
+- status: 支付状态 (pending/completed/failed/refunded)
+- transactionId: 交易ID (Ping++ charge ID)
 - createdAt: 创建时间
-
-## 资源导入格式
-
-### 文本格式
-
-```
-通过网盘分享的文件：2025消防宣传月消防安全知识培训 2025-11-7 92035 2.pptx
-链接: https://pan.baidu.com/s/1AcJvBQg8mLSV07jp-J-XtQ?pwd=5678 提取码: 5678
---来自百度网盘超级会员v5的分享
-
----
-
-通过网盘分享的文件：事故调查报告.pdf
-链接: https://pan.baidu.com/s/1xxx 提取码: 1234
+- updatedAt: 更新时间
 ```
 
-### CSV 格式
-
-```csv
-标题,分类,链接,提取码
-2025消防宣传月,安全课件,https://pan.baidu.com/s/1xxx,5678
-事故调查报告,事故调查报告,https://pan.baidu.com/s/1yyy,1234
+### 其他表
+```
+- categories: 分类表
+- resources: 资源表
+- downloads: 下载记录表
 ```
 
-## 分类和点数
+## 支付系统 API
 
-| 分类 | 默认点数 | 说明 |
-|------|---------|------|
-| 安全课件 | 5-10 | 培训资料、讲座 |
-| 事故调查报告 | 15-20 | 专业报告 |
-| 标准规范 | 20-30 | 行业标准、规程 |
-| 事故警示视频 | 10-15 | 视频资料 |
-| 安全管理书籍 | 30-50 | 电子书籍 |
+### 初始化支付
+```
+POST /api/payments/initiate
+Authorization: Bearer {jwt_token}
+Content-Type: application/json
 
-## API 端点
+{
+  "points": 500,
+  "amount": 5.00,
+  "paymentMethod": "wechat"
+}
+```
 
-### 认证
-- `POST /api/auth/register` - 用户注册
-- `POST /api/auth/login` - 用户登录
+### 查询支付状态
+```
+GET /api/payments/status/{paymentId}
+```
 
-### 资源
-- `GET /api/resources` - 获取资源列表
-- `POST /api/resources/import` - 导入资源
+### Webhook 回调（来自 Ping++）
+```
+POST /api/payments/callback
+X-Pingplusplus-Signature: {signature}
 
-### 分类
-- `GET /api/categories` - 获取分类列表
-- `POST /api/categories` - 创建分类
+{
+  "type": "charge.succeeded|charge.failed|refund.succeeded",
+  "data": { ... }
+}
+```
 
 ## 部署到 Vercel
 
-1. 推送代码到 GitHub
-2. 在 Vercel 中连接 GitHub 仓库
-3. 配置环境变量
-4. 自动部署
+### 1. 推送代码到 GitHub
+```bash
+git push origin main
+```
+
+### 2. 在 Vercel 中导入项目
+- 访问 https://vercel.com
+- 连接 GitHub 仓库
+- 选择项目根目录
+
+### 3. 配置环境变量
+```
+DATABASE_URL=your_neon_database_url
+PING_APP_ID=sk_live_xxx
+PING_API_KEY=sk_live_xxx
+PING_WEBHOOK_KEY=whsec_xxx
+```
+
+### 4. 部署
+- 自动部署：推送到 main 分支
+- 手动部署：在 Vercel 控制台点击 "Redeploy"
+
+## 常见命令
+
+```bash
+# 开发服务器
+npm run dev
+
+# 生产构建
+npm run build
+
+# 启动生产服务器
+npm start
+
+# 数据库迁移
+npm run prisma:migrate
+
+# Prisma Studio（数据库可视化）
+npm run prisma:studio
+
+# 初始化示例数据
+npm run db:setup
+```
+
+## 支付集成步骤
+
+### 第 1 步：获取 Ping++ 凭证
+1. 注册 Ping++ 账户
+2. 完成企业认证
+3. 获取 API Key 和 Webhook Key
+
+### 第 2 步：配置环境
+1. 更新 Vercel 环境变量
+2. 配置 Webhook URL
+
+### 第 3 步：测试
+1. 使用测试凭证进行支付测试
+2. 验证 Webhook 回调
+
+详见 [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md)
 
 ## 免责声明
 
