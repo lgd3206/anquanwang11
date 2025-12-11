@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { transactionId, status, paymentMethod } = body;
+    const { transactionId, status } = body;
 
     if (!transactionId || !status) {
       return NextResponse.json(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -17,7 +17,7 @@ const packages: RechargePackage[] = [
   { points: 2000, price: 129.9, discount: "6.5折" },
 ];
 
-export default function RechargePage() {
+function RechargeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<RechargePackage | null>(null);
@@ -269,5 +269,13 @@ export default function RechargePage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function RechargePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RechargeContent />
+    </Suspense>
   );
 }

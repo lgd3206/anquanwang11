@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // In production, integrate with actual payment provider
     // For now, return mock QR code
-    const qrCode = generateMockQRCode(payment.transactionId, amount, paymentMethod);
+    const qrCode = generateMockQRCode(payment.transactionId || "", amount, paymentMethod);
 
     return NextResponse.json(
       {
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 }
 
 function generateMockQRCode(
-  transactionId: string,
+  _transactionId: string,
   amount: number,
   method: string
 ): string {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -21,7 +21,7 @@ interface Resource {
   createdAt: string;
 }
 
-export default function ResourcesPage() {
+function ResourcesContent() {
   const searchParams = useSearchParams();
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -259,5 +259,13 @@ export default function ResourcesPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function ResourcesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResourcesContent />
+    </Suspense>
   );
 }
