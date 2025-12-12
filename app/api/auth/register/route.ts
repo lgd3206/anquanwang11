@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         email: normalizedEmail,
         password: hashedPassword,
         name: name || email.split("@")[0],
-        points: 100, // Initial points
+        points: 30, // Initial points
       },
     });
 
