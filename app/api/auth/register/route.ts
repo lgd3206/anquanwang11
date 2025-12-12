@@ -1,47 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { registerSchema, validateInput } from "@/lib/validation";
+import { withRateLimit } from "@/lib/rateLimit";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json();
+    // 速率限制检查
+    const rateLimitResult = withRateLimit(request, "register");
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response;
+    }
 
-    // Validation
-    if (!email || !password) {
+    const body = await request.json();
+
+    // 输入验证
+    const validation = validateInput(registerSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { message: "邮箱和密码不能为空" },
+        { message: validation.error },
         { status: 400 }
       );
     }
 
-    if (password.length < 6) {
-      return NextResponse.json(
-        { message: "密码至少需要6个字符" },
-        { status: 400 }
-      );
-    }
+    const { email, password, name } = validation.data;
+    const normalizedEmail = email.toLowerCase().trim();
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (existingUser) {
+      // 使用固定延迟防止用户枚举
+      await new Promise((r) => setTimeout(r, 200));
       return NextResponse.json(
         { message: "该邮箱已被注册" },
         { status: 400 }
       );
     }
 
-    // Hash password
-    const hashedPassword = await hash(password, 10);
+    // Hash password with cost factor 12
+    const hashedPassword = await hash(password, 12);
 
     // Create user with initial points
     const user = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
         name: name || email.split("@")[0],
         points: 100, // Initial points

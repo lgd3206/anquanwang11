@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
+import { paymentInitSchema, validateInput } from "@/lib/validation";
+import { withRateLimit } from "@/lib/rateLimit";
 import pingxxClient, {
   formatAmountToCents,
   generateOrderId,
-  isValidAmount,
 } from "@/lib/pingpp";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
+    // 速率限制检查
+    const rateLimitResult = withRateLimit(request, "payment");
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response;
+    }
+
     const token = getTokenFromRequest(request);
 
     if (!token) {
@@ -29,32 +36,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { points, amount, paymentMethod } = await request.json();
+    const body = await request.json();
 
-    if (!points || !amount || !paymentMethod) {
+    // 输入验证
+    const validation = validateInput(paymentInitSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { message: "参数不完整" },
+        { message: validation.error },
         { status: 400 }
       );
     }
 
-    if (!["wechat", "alipay"].includes(paymentMethod)) {
-      return NextResponse.json(
-        { message: "不支持的支付方式" },
-        { status: 400 }
-      );
-    }
-
-    // Validate amount (Ping++ requires 0.01 to 999,999 CNY)
-    if (!isValidAmount(amount)) {
-      return NextResponse.json(
-        {
-          message:
-            "支付金额无效，必须在 0.01 到 999,999 元之间",
-        },
-        { status: 400 }
-      );
-    }
+    const { points, amount, paymentMethod } = validation.data;
 
     // Generate order ID
     const orderId = generateOrderId();

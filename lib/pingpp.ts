@@ -137,18 +137,31 @@ class PingxxClient {
   }
 
   /**
-   * 验证 Webhook 签名
+   * 验证 Webhook 签名（使用时间安全比较防止计时攻击）
    * @param data Raw body 数据
    * @param signature 签名（HTTP 头 X-Pingplusplus-Signature）
    * @returns 签名是否有效
    */
   verifySignature(data: string, signature: string): boolean {
+    if (!PING_WEBHOOK_KEY) {
+      console.warn("PING_WEBHOOK_KEY not configured");
+      return false;
+    }
+
     const computedSignature = crypto
       .createHmac('sha256', PING_WEBHOOK_KEY)
       .update(data, 'utf8')
       .digest('hex');
 
-    return computedSignature === signature;
+    // 使用时间安全比较防止计时攻击
+    if (computedSignature.length !== signature.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(
+      Buffer.from(computedSignature, 'utf8'),
+      Buffer.from(signature, 'utf8')
+    );
   }
 }
 

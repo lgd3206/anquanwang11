@@ -1,20 +1,32 @@
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 export interface TokenPayload {
   userId: number;
   email: string;
 }
 
+function getJwtSecret(): string {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "NEXTAUTH_SECRET environment variable must be set with at least 32 characters"
+    );
+  }
+  return secret;
+}
+
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.NEXTAUTH_SECRET || "your-secret-key"
-    ) as TokenPayload;
+    const decoded = jwt.verify(token, getJwtSecret()) as TokenPayload;
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
+}
+
+export function signToken(payload: TokenPayload, expiresIn: string = "7d"): string {
+  const options: SignOptions = { expiresIn: expiresIn as jwt.SignOptions["expiresIn"] };
+  return jwt.sign(payload, getJwtSecret(), options);
 }
 
 export function getTokenFromRequest(request: Request): string | null {

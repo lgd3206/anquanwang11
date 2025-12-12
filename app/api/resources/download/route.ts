@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
+import { downloadSchema, validateInput } from "@/lib/validation";
+import { withRateLimit } from "@/lib/rateLimit";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
+    // 速率限制检查
+    const rateLimitResult = withRateLimit(request, "download");
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response;
+    }
+
     const token = getTokenFromRequest(request);
 
     if (!token) {
@@ -24,14 +32,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { resourceId } = await request.json();
+    const body = await request.json();
 
-    if (!resourceId) {
+    // 输入验证
+    const validation = validateInput(downloadSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { message: "资源ID不能为空" },
+        { message: validation.error },
         { status: 400 }
       );
     }
+
+    const { resourceId } = validation.data;
 
     // Get resource
     const resource = await prisma.resource.findUnique({

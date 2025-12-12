@@ -1,28 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { compare } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
+import { signToken } from "@/lib/auth";
+import { loginSchema, validateInput } from "@/lib/validation";
+import { withRateLimit } from "@/lib/rateLimit";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    // 速率限制检查
+    const rateLimitResult = withRateLimit(request, "login");
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response;
+    }
 
-    // Validation
-    if (!email || !password) {
+    const body = await request.json();
+
+    // 输入验证
+    const validation = validateInput(loginSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { message: "邮箱和密码不能为空" },
+        { message: validation.error },
         { status: 400 }
       );
     }
 
+    const { email, password } = validation.data;
+
     // Find user
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase().trim() },
     });
 
     if (!user) {
+      // 使用固定延迟防止用户枚举
+      await new Promise((r) => setTimeout(r, 200));
       return NextResponse.json(
         { message: "邮箱或密码错误" },
         { status: 401 }
@@ -40,11 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.NEXTAUTH_SECRET || "your-secret-key",
-      { expiresIn: "7d" }
-    );
+    const token = signToken({ userId: user.id, email: user.email });
 
     return NextResponse.json(
       {
