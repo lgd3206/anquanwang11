@@ -318,31 +318,48 @@ export default function DashboardPage() {
                 {/* Recharge Plans */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-xl font-bold mb-4">充值套餐</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                     {[
+                      { points: 50, price: 4.9, badge: "试水" },
                       { points: 100, price: 9.9 },
+                      { points: 300, price: 24.9, badge: "推荐" },
                       { points: 500, price: 39.9 },
-                      { points: 1000, price: 69.9 },
+                      { points: 1000, price: 59.9, badge: "热销" },
+                      { points: 2000, price: 99.9 },
+                      { points: 5000, price: 199.9, badge: "最划算" },
                     ].map((plan) => (
                       <div
                         key={plan.points}
-                        className="border border-gray-200 rounded-lg p-4 text-center hover:border-blue-600 hover:shadow-md transition-all"
+                        className="relative border border-gray-200 rounded-lg p-3 text-center hover:border-blue-600 hover:shadow-md transition-all"
                       >
-                        <p className="text-3xl font-bold text-blue-600 mb-2">
+                        {plan.badge && (
+                          <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                            {plan.badge}
+                          </div>
+                        )}
+                        <p className="text-2xl font-bold text-blue-600 mb-1">
                           {plan.points}
                         </p>
-                        <p className="text-gray-600 mb-4">积分</p>
-                        <p className="text-2xl font-bold text-gray-800 mb-4">
+                        <p className="text-xs text-gray-600 mb-2">积分</p>
+                        <p className="text-lg font-bold text-gray-800 mb-2">
                           ¥{plan.price}
+                        </p>
+                        <p className="text-xs text-gray-500 mb-3">
+                          ¥{(plan.price / plan.points).toFixed(3)}/点
                         </p>
                         <Link
                           href={`/recharge?plan=${plan.points}`}
-                          className="btn-primary w-full text-center block"
+                          className="btn-primary w-full text-center block text-sm py-2"
                         >
-                          立即充值
+                          充值
                         </Link>
                       </div>
                     ))}
+                  </div>
+                  <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-800 text-center font-medium">
+                      💎 充值越多越划算！大额套餐最高优惠60%
+                    </p>
                   </div>
                 </div>
               </div>

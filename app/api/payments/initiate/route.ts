@@ -49,6 +49,21 @@ export async function POST(request: NextRequest) {
 
     const { points, amount, paymentMethod } = validation.data;
 
+    // 检查是否首次充值
+    const paymentHistory = await prisma.payment.count({
+      where: {
+        userId: payload.userId,
+        status: "completed",
+        paymentMethod: { not: "gift" }, // 排除赠送记录
+      },
+    });
+
+    const isFirstRecharge = paymentHistory === 0;
+
+    // 首次充值奖励：额外赠送30%积分
+    const bonusPoints = isFirstRecharge ? Math.floor(points * 0.3) : 0;
+    const totalPoints = points + bonusPoints;
+
     // Generate order ID
     const orderId = generateOrderId();
 
@@ -57,7 +72,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: payload.userId,
         amount,
-        pointsAdded: points,
+        pointsAdded: totalPoints, // 保存实际到账积分（包含奖励）
         paymentMethod,
         status: "pending",
         transactionId: orderId,
@@ -107,6 +122,9 @@ export async function POST(request: NextRequest) {
             qrCode: chargeData.credential?.qr_code || null,
             amount,
             points,
+            bonusPoints, // 奖励积分
+            totalPoints, // 实际到账积分
+            isFirstRecharge, // 是否首次充值
             channel: chargeData.channel,
           },
           { status: 201 }
@@ -144,6 +162,9 @@ export async function POST(request: NextRequest) {
           qrCode,
           amount,
           points,
+          bonusPoints, // 奖励积分
+          totalPoints, // 实际到账积分
+          isFirstRecharge, // 是否首次充值
           isTestMode: true,
         },
         { status: 201 }

@@ -8,13 +8,17 @@ interface RechargePackage {
   points: number;
   price: number;
   discount?: string;
+  badge?: string;
 }
 
 const packages: RechargePackage[] = [
+  { points: 50, price: 4.9, badge: "试水" },
   { points: 100, price: 9.9 },
-  { points: 500, price: 39.9, discount: "8折" },
-  { points: 1000, price: 69.9, discount: "7折" },
-  { points: 2000, price: 129.9, discount: "6.5折" },
+  { points: 300, price: 24.9, badge: "推荐" },
+  { points: 500, price: 39.9 },
+  { points: 1000, price: 59.9, discount: "限时特惠", badge: "热销" },
+  { points: 2000, price: 99.9, discount: "立省100" },
+  { points: 5000, price: 199.9, discount: "超值", badge: "最划算" },
 ];
 
 function RechargeContent() {
@@ -25,6 +29,36 @@ function RechargeContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [isFirstRecharge, setIsFirstRecharge] = useState(false);
+  const [checkingFirstRecharge, setCheckingFirstRecharge] = useState(true);
+
+  // 检查是否首次充值
+  useEffect(() => {
+    const checkFirstRecharge = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setCheckingFirstRecharge(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/user/first-recharge", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsFirstRecharge(data.isFirstRecharge);
+        }
+      } catch (err) {
+        console.error("Check first recharge error:", err);
+      } finally {
+        setCheckingFirstRecharge(false);
+      }
+    };
+
+    checkFirstRecharge();
+  }, []);
 
   useEffect(() => {
     const planParam = searchParams.get("plan");
@@ -103,42 +137,70 @@ function RechargeContent() {
 
       <main className="container py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-800 mb-8">充值积分</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">充值积分</h1>
+
+          {/* 首次充值优惠提示 */}
+          {!checkingFirstRecharge && isFirstRecharge && (
+            <div className="mb-6 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg shadow-lg p-6 text-white animate-pulse">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <span className="text-4xl">🎉</span>
+                <h2 className="text-2xl font-bold">首次充值特惠</h2>
+                <span className="text-4xl">🎁</span>
+              </div>
+              <p className="text-center text-lg font-medium mb-2">
+                恭喜您！首次充值额外赠送 <span className="text-3xl font-bold">30%</span> 积分
+              </p>
+              <p className="text-center text-sm opacity-90">
+                例如：充值1000积分，实际到账1300积分！仅限首次充值享受
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Package Selection */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">选择充值套餐</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {packages.map((pkg) => (
                     <div
                       key={pkg.points}
                       onClick={() => setSelectedPackage(pkg)}
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all ${
                         selectedPackage?.points === pkg.points
-                          ? "border-blue-600 bg-blue-50"
-                          : "border-gray-200 hover:border-blue-300"
+                          ? "border-blue-600 bg-blue-50 shadow-md"
+                          : "border-gray-200 hover:border-blue-300 hover:shadow"
                       }`}
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="text-2xl font-bold text-blue-600">
-                            {pkg.points}
-                          </p>
-                          <p className="text-gray-600 text-sm">积分</p>
+                      {pkg.badge && (
+                        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                          {pkg.badge}
                         </div>
+                      )}
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-blue-600 mb-1">
+                          {pkg.points}
+                        </p>
+                        <p className="text-gray-600 text-xs mb-2">积分</p>
+                        <p className="text-lg font-bold text-gray-800 mb-1">
+                          ¥{pkg.price}
+                        </p>
                         {pkg.discount && (
-                          <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                          <p className="text-xs text-red-600 font-medium">
                             {pkg.discount}
-                          </span>
+                          </p>
                         )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          ¥{(pkg.price / pkg.points).toFixed(3)}/点
+                        </p>
                       </div>
-                      <p className="text-xl font-bold text-gray-800">
-                        ¥{pkg.price}
-                      </p>
                     </div>
                   ))}
+                </div>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800 text-center">
+                    💡 充值越多越划算！5000积分套餐单价仅¥0.04/点
+                  </p>
                 </div>
               </div>
 
@@ -191,7 +253,28 @@ function RechargeContent() {
                           {selectedPackage.points}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      {isFirstRecharge && (
+                        <>
+                          <div className="flex justify-between text-green-600">
+                            <span className="flex items-center gap-1">
+                              <span>🎁</span>
+                              <span>首充奖励(+30%)</span>
+                            </span>
+                            <span className="font-bold">
+                              +{Math.floor(selectedPackage.points * 0.3)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-green-50 rounded-lg border border-green-200">
+                            <span className="text-sm font-medium text-green-800">
+                              实际到账
+                            </span>
+                            <span className="text-xl font-bold text-green-600">
+                              {selectedPackage.points + Math.floor(selectedPackage.points * 0.3)} 点
+                            </span>
+                          </div>
+                        </>
+                      )}
+                      <div className="flex justify-between pt-2 border-t">
                         <span className="text-gray-600">支付金额</span>
                         <span className="font-bold text-gray-800">
                           ¥{selectedPackage.price}
