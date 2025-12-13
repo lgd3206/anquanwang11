@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { isTokenExpired } from "@/lib/token";
 import { sendBonusEmail } from "@/lib/email";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 const prisma = new PrismaClient();
 
@@ -25,7 +26,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // 🔒 速率限制：防止针对特定邮箱的DoS攻击
+    // 按 IP + 邮箱 限流，每小时最多10次验证尝试
     const normalizedEmail = email.toLowerCase().trim();
+    const clientIp = getClientIp(request);
+    const rateLimitKey = `verify:${clientIp}:${normalizedEmail}`;
+
+    const rateLimitResult = checkRateLimit(rateLimitKey, "api");
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          message: "验证尝试过于频繁，请稍后再试",
+          retryAfter: rateLimitResult.retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(rateLimitResult.retryAfter || 60) } }
+      );
+    }
 
     // 查找用户
     const user = await prisma.user.findUnique({
@@ -141,7 +157,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 🔒 速率限制：防止针对特定邮箱的DoS攻击
+    // 按 IP + 邮箱 限流，每小时最多10次验证尝试
     const normalizedEmail = email.toLowerCase().trim();
+    const clientIp = getClientIp(request);
+    const rateLimitKey = `verify:${clientIp}:${normalizedEmail}`;
+
+    const rateLimitResult = checkRateLimit(rateLimitKey, "api");
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          message: "验证尝试过于频繁，请稍后再试",
+          retryAfter: rateLimitResult.retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(rateLimitResult.retryAfter || 60) } }
+      );
+    }
 
     // 查找用户
     const user = await prisma.user.findUnique({
