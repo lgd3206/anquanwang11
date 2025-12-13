@@ -3,6 +3,9 @@ import { hash } from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import { registerSchema, validateInput } from "@/lib/validation";
 import { withRateLimit } from "@/lib/rateLimit";
+import { generateVerificationToken, getVerificationTokenExpiry } from "@/lib/token";
+import { sendVerificationEmail } from "@/lib/email";
+import { isDisposableEmail } from "@/lib/disposableEmail";
 
 const prisma = new PrismaClient();
 
@@ -28,6 +31,14 @@ export async function POST(request: NextRequest) {
     const { email, password, name } = validation.data;
     const normalizedEmail = email.toLowerCase().trim();
 
+    // 检查是否为一次性邮箱
+    if (isDisposableEmail(normalizedEmail)) {
+      return NextResponse.json(
+        { message: "不支持使用一次性邮箱注册" },
+        { status: 400 }
+      );
+    }
+
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { email: normalizedEmail },
@@ -45,19 +56,32 @@ export async function POST(request: NextRequest) {
     // Hash password with cost factor 12
     const hashedPassword = await hash(password, 12);
 
-    // Create user with initial points
+    // 生成验证token
+    const verificationToken = generateVerificationToken();
+    const verificationExpiresAt = getVerificationTokenExpiry();
+
+    // 创建用户，初始积分为0，不立即发放
     const user = await prisma.user.create({
       data: {
         email: normalizedEmail,
         password: hashedPassword,
         name: name || email.split("@")[0],
-        points: 30, // Initial points
+        points: 0, // 初始积分为0，等待邮箱验证后再发放
+        verificationToken,
+        verificationExpiresAt,
+        emailVerifiedAt: null,
+        signupBonusGranted: false,
       },
+    });
+
+    // 异步发送验证邮件（不阻塞响应）
+    sendVerificationEmail(normalizedEmail, verificationToken).catch((err) => {
+      console.error("Failed to send verification email:", err);
     });
 
     return NextResponse.json(
       {
-        message: "注册成功",
+        message: "注册成功！请检查邮箱完成验证",
         user: {
           id: user.id,
           email: user.email,

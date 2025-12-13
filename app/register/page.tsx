@@ -1,17 +1,21 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 function RegisterContent() {
   const router = useRouter();
+  const captchaRef = useRef<HCaptcha>(null);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
     name: "",
   });
+  const [captchaToken, setCaptchaToken] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,18 +27,45 @@ function RegisterContent() {
     }));
   };
 
+  const handleCaptchaChange = (token: string) => {
+    setCaptchaToken(token);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
+    // 验证密码
     if (formData.password !== formData.confirmPassword) {
       setError("两次输入的密码不一致");
       setLoading(false);
       return;
     }
 
+    // 验证hCaptcha
+    if (!captchaToken) {
+      setError("请完成人类验证");
+      setLoading(false);
+      return;
+    }
+
     try {
+      // 先验证captcha
+      const captchaVerifyResponse = await fetch("/api/hcaptcha/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+
+      if (!captchaVerifyResponse.ok) {
+        setError("人类验证失败，请重试");
+        // 重置captcha
+        captchaRef.current?.resetCaptcha();
+        return;
+      }
+
+      // captcha通过，提交注册
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,12 +80,16 @@ function RegisterContent() {
 
       if (!response.ok) {
         setError(data.message || "注册失败");
+        // 重置captcha以便重试
+        captchaRef.current?.resetCaptcha();
         return;
       }
 
+      // 注册成功
       router.push("/login?registered=true");
     } catch (err) {
       setError("注册过程中出错，请重试");
+      captchaRef.current?.resetCaptcha();
     } finally {
       setLoading(false);
     }
@@ -133,9 +168,20 @@ function RegisterContent() {
             />
           </div>
 
+          {/* hCaptcha 组件 */}
+          <div className="flex justify-center p-4 bg-gray-50 rounded-lg">
+            <HCaptcha
+              ref={captchaRef}
+              sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ""}
+              onVerify={handleCaptchaChange}
+              theme="light"
+              size="normal"
+            />
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaToken}
             className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "注册中..." : "注册"}
