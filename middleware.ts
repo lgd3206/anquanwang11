@@ -16,16 +16,16 @@ export function middleware(request: NextRequest) {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     // 权限策略
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-    // 内容安全策略
+    // 内容安全策略 (临时宽松配置，用于调试hCaptcha)
     "Content-Security-Policy": [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hcaptcha.com https://www.googletagmanager.com https://www.google-analytics.com",
-      "script-src-elem 'self' 'unsafe-inline' https://js.hcaptcha.com https://www.googletagmanager.com",
-      "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://newsassets.hcaptcha.com",
-      "img-src 'self' data: https:",
-      "font-src 'self' https://newsassets.hcaptcha.com",
-      "connect-src 'self' https://api.pingxx.com https://hcaptcha.com https://newsassets.hcaptcha.com https://sentry.hcaptcha.com https://www.googletagmanager.com https://www.google-analytics.com",
-      "frame-src https://hcaptcha.com https://newsassets.hcaptcha.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:",
+      "script-src-elem 'self' 'unsafe-inline' https: http:",
+      "style-src 'self' 'unsafe-inline' https: http:",
+      "img-src 'self' data: https: http:",
+      "font-src 'self' data: https: http:",
+      "connect-src 'self' https: http: wss: ws:",
+      "frame-src 'self' https: http:",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
