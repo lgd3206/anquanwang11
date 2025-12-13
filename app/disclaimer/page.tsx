@@ -103,11 +103,11 @@ export default function DisclaimerPage() {
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex gap-3">
                     <span className="text-blue-600 font-bold">📧</span>
-                    <span>邮箱：<a href="mailto:support@example.com" className="text-blue-600 hover:underline">support@example.com</a></span>
+                    <span>邮箱：<a href="mailto:1591605408@qq.com" className="text-blue-600 hover:underline">1591605408@qq.com</a></span>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-blue-600 font-bold">📱</span>
-                    <span>微信/QQ：<span className="font-mono">12345678</span>（将您的具体信息替换此处）</span>
+                    <span>QQ：<span className="font-mono">1591605408</span></span>
                   </li>
                 </ul>
               </div>
