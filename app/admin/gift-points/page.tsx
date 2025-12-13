@@ -17,6 +17,7 @@ export default function GiftPointsPage() {
   const [points, setPoints] = useState(1000);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [results, setResults] = useState<GiftResult[]>([]);
   const [summary, setSummary] = useState<{
     total: number;
@@ -30,10 +31,9 @@ export default function GiftPointsPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        // 立即显示登录提示，不等待任何异步操作
-        setChecking(false);
-        alert("请先登录");
+        // 未登录，跳转到登录页（不设置 checking=false，保持 loading 状态）
         router.push("/login");
+        setTimeout(() => alert("请先登录"), 100);
         return;
       }
 
@@ -50,25 +50,26 @@ export default function GiftPointsPage() {
 
         // 如果返回403，说明不是管理员
         if (response.status === 403) {
-          alert("无权限访问此页面");
           router.push("/dashboard");
+          setTimeout(() => alert("无权限访问此页面"), 100);
           return;
         }
 
         // 如果返回401，说明未登录或token过期
         if (response.status === 401) {
-          alert("登录已过期，请重新登录");
           localStorage.removeItem("token");
           router.push("/login");
+          setTimeout(() => alert("登录已过期，请重新登录"), 100);
           return;
         }
 
-        // 权限验证通过
+        // 权限验证通过，显示页面内容
+        setIsAuthorized(true);
         setChecking(false);
       } catch (error) {
         console.error("Auth check error:", error);
-        alert("验证失败，请重新登录");
         router.push("/login");
+        setTimeout(() => alert("验证失败，请重新登录"), 100);
       }
     };
 
@@ -132,8 +133,8 @@ export default function GiftPointsPage() {
     }
   };
 
-  // 加载中显示
-  if (checking) {
+  // 验证中或未授权时显示 loading
+  if (checking || !isAuthorized) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
         <div className="text-xl text-gray-600">验证权限中...</div>
