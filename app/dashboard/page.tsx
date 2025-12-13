@@ -252,10 +252,10 @@ export default function DashboardPage() {
                   <h2 className="text-xl font-bold mb-4">积分说明</h2>
                   <div className="space-y-3 text-gray-700">
                     <p>
-                      <span className="font-medium">注册赠送:</span> 新用户注册时赠送 100 点积分
+                      <span className="font-medium">注册赠送:</span> 新用户注册时赠送 30 点积分
                     </p>
                     <p>
-                      <span className="font-medium">消费规则:</span> 下载资源时消费相应点数
+                      <span className="font-medium">消费规则:</span> 下载资源时消费相应点数，具体根据资料价值由管理员设定
                     </p>
                     <p>
                       <span className="font-medium">充值方式:</span> 支持微信支付和支付宝充值
@@ -287,28 +287,28 @@ export default function DashboardPage() {
                       <tbody className="divide-y">
                         <tr>
                           <td className="px-4 py-3">安全课件</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">5-10</td>
-                          <td className="px-4 py-3 text-gray-600">培训资料、讲座</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">事故调查报告</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">15-20</td>
-                          <td className="px-4 py-3 text-gray-600">专业报告</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-20</td>
+                          <td className="px-4 py-3 text-gray-600">培训资料、讲座PPT</td>
                         </tr>
                         <tr>
                           <td className="px-4 py-3">标准规范</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">20-30</td>
-                          <td className="px-4 py-3 text-gray-600">行业标准、规程</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-15</td>
+                          <td className="px-4 py-3 text-gray-600">国家标准、行业规程</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">事故调查报告</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-10</td>
+                          <td className="px-4 py-3 text-gray-600">各类事故调查报告</td>
                         </tr>
                         <tr>
                           <td className="px-4 py-3">事故警示视频</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">10-15</td>
-                          <td className="px-4 py-3 text-gray-600">视频资料</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">3-20</td>
+                          <td className="px-4 py-3 text-gray-600">警示教育视频</td>
                         </tr>
                         <tr>
                           <td className="px-4 py-3">安全管理书籍</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">30-50</td>
-                          <td className="px-4 py-3 text-gray-600">电子书籍</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">10-60</td>
+                          <td className="px-4 py-3 text-gray-600">专业电子书籍</td>
                         </tr>
                       </tbody>
                     </table>
