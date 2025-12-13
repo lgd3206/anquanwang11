@@ -30,13 +30,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查是否为管理员（这里简单检查，可以根据实际需求完善）
+    // 检查是否为管理员（仅允许特定邮箱）
     const admin = await prisma.user.findUnique({
       where: { id: payload.userId },
     });
 
-    // 仅允许特定的管理员邮箱操作（你可以根据需要添加邮箱）
-    const adminEmails = ["admin@example.com", "lgd3206@gmail.com"]; // 添加你的管理员邮箱
+    // 仅允许特定的管理员邮箱操作
+    const adminEmails = [
+      "329938313@qq.com", // 主管理员
+    ];
 
     if (!admin || !adminEmails.includes(admin.email)) {
       return NextResponse.json(
