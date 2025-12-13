@@ -20,6 +20,8 @@ export default function ImportPage() {
       const token = localStorage.getItem("token");
 
       if (!token) {
+        // 立即显示登录提示，不等待任何异步操作
+        setChecking(false);
         alert("请先登录");
         router.push("/login");
         return;
