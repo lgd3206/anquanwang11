@@ -33,7 +33,10 @@ export default function ImportPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ resources: [], importType: "text" }),
+          body: JSON.stringify({
+            resources: [{ title: "test", link: "https://example.com", password: "test" }],
+            importType: "text",
+          }),
         });
 
         if (response.status === 403) {

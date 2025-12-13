@@ -43,7 +43,7 @@ export default function GiftPointsPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ emails: [], points: 0 }),
+          body: JSON.stringify({ emails: ["test@example.com"], points: 1 }),
         });
 
         // 如果返回403，说明不是管理员
