@@ -25,7 +25,7 @@ export function middleware(request: NextRequest) {
       "img-src 'self' data: https:",
       "font-src 'self' https://newsassets.hcaptcha.com",
       "connect-src 'self' https://api.pingxx.com https://hcaptcha.com https://newsassets.hcaptcha.com https://sentry.hcaptcha.com https://www.googletagmanager.com https://www.google-analytics.com",
-      "frame-src https://hcaptcha.com",
+      "frame-src https://hcaptcha.com https://newsassets.hcaptcha.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
