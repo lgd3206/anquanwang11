@@ -74,10 +74,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 异步发送验证邮件（不阻塞响应）
-    sendVerificationEmail(normalizedEmail, verificationToken).catch((err) => {
-      console.error("Failed to send verification email:", err);
+    console.log("✅ 用户创建成功，准备发送验证邮件:", {
+      email: normalizedEmail,
+      userId: user.id,
+      tokenLength: verificationToken.length,
     });
+
+    // 同步发送验证邮件，确保邮件发送
+    try {
+      const emailSent = await sendVerificationEmail(
+        normalizedEmail,
+        verificationToken,
+        process.env.NEXT_PUBLIC_APP_URL || "https://anquanwang11.vercel.app"
+      );
+
+      if (emailSent) {
+        console.log("✅ 验证邮件发送成功:", normalizedEmail);
+      } else {
+        console.error("❌ 验证邮件发送失败（返回false）:", normalizedEmail);
+      }
+    } catch (emailError) {
+      console.error("❌ 验证邮件发送异常:", emailError);
+      // 即使邮件发送失败，用户也已创建，不影响注册流程
+    }
 
     return NextResponse.json(
       {
