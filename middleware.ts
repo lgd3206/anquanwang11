@@ -19,11 +19,12 @@ export function middleware(request: NextRequest) {
     // 内容安全策略
     "Content-Security-Policy": [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.hcaptcha.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self'",
-      "connect-src 'self' https://api.pingxx.com",
+      "connect-src 'self' https://api.pingxx.com https://hcaptcha.com https://sentry.hcaptcha.com",
+      "frame-src https://hcaptcha.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
