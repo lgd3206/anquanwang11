@@ -133,7 +133,7 @@ export default function Home() {
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             安全资源分享平台
           </h1>
-          <p className="text-lg md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
+          <p className="text-lg md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto text-center">
             汇聚安全课件、事故报告、标准规范、警示视频、管理书籍等优质资源
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
@@ -224,11 +224,14 @@ export default function Home() {
       </section>
       <section className="bg-yellow-50 border-l-4 border-yellow-400 py-8">
         <div className="container">
-          <h3 className="text-lg font-bold text-yellow-800 mb-2">⚠️ 免责声明</h3>
+          <h3 className="text-lg font-bold text-yellow-800 mb-2">⚠️ 重要提示</h3>
           <p className="text-yellow-700 text-sm">
             本网站仅为资源分享交流学习平台，所有资源均来自用户分享。用户应自行判断资源的合法性和真实性。
             本网站不对资源内容的准确性、完整性、合法性负责。付费仅为维持网站日常服务器等正常费用。
             用户使用本网站资源产生的任何后果，本网站不承担任何责任。
+            <Link href="/disclaimer" className="text-yellow-800 underline hover:text-yellow-900 ml-2 font-medium">
+              查看完整免责声明 →
+            </Link>
           </p>
         </div>
       </section>
