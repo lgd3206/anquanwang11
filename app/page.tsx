@@ -237,7 +237,13 @@ export default function Home() {
       <footer className="bg-gray-800 text-gray-300 py-8 mt-16">
         <div className="container text-center">
           <p>&copy; 2025 安全资源分享网. 保留所有权利。</p>
-          <p className="text-sm mt-2">仅供学习交流使用</p>
+          <p className="text-sm mt-4 space-x-4">
+            <Link href="/disclaimer" className="hover:text-white transition">
+              免责声明
+            </Link>
+            <span>|</span>
+            <span>仅供学习交流使用</span>
+          </p>
         </div>
       </footer>
     </main>
