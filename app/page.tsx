@@ -1,13 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Counter } from "@/app/components/Counter";
 
 export default function Home() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [stats, setStats] = useState({
+    totalResources: 1200,
+    totalUsers: 500,
+    totalTransactions: 3000,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // 获取统计数据
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/stats");
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,7 +191,37 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Disclaimer Section */}
+      {/* Statistics Section */}
+      <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">平台数据</h2>
+          <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
+            获得全球安全专业人士的信任
+          </p>
+          {!statsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center p-8 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow">
+                <Counter target={stats.totalResources} label="优质资源" icon="📚" />
+              </div>
+              <div className="text-center p-8 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow">
+                <Counter target={stats.totalUsers} label="活跃用户" icon="👥" />
+              </div>
+              <div className="text-center p-8 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow">
+                <Counter target={stats.totalTransactions} label="成功交易" icon="💳" />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="text-center p-8 rounded-lg bg-white shadow-md animate-pulse">
+                  <div className="h-16 bg-gray-200 rounded mb-4"></div>
+                  <div className="h-6 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
       <section className="bg-yellow-50 border-l-4 border-yellow-400 py-8">
         <div className="container">
           <h3 className="text-lg font-bold text-yellow-800 mb-2">⚠️ 免责声明</h3>
