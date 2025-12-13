@@ -19,6 +19,17 @@ function RegisterContent() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 调试：检查环境变量是否加载
+  const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
+  React.useEffect(() => {
+    if (!siteKey) {
+      console.error("❌ NEXT_PUBLIC_HCAPTCHA_SITE_KEY 未在Vercel配置");
+      setError("hCaptcha配置错误，请联系管理员");
+    } else {
+      console.log("✅ hCaptcha sitekey已加载:", siteKey.substring(0, 10) + "...");
+    }
+  }, [siteKey]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -170,13 +181,17 @@ function RegisterContent() {
 
           {/* hCaptcha 组件 */}
           <div className="flex justify-center p-4 bg-gray-50 rounded-lg">
-            <HCaptcha
-              ref={captchaRef}
-              sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ""}
-              onVerify={handleCaptchaChange}
-              theme="light"
-              size="normal"
-            />
+            {siteKey ? (
+              <HCaptcha
+                ref={captchaRef}
+                sitekey={siteKey}
+                onVerify={handleCaptchaChange}
+                theme="light"
+                size="normal"
+              />
+            ) : (
+              <div className="text-red-600 font-medium">hCaptcha配置错误</div>
+            )}
           </div>
 
           <button
