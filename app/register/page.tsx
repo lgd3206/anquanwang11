@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense, useRef } from "react";
+import { useState, Suspense, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
@@ -21,7 +21,7 @@ function RegisterContent() {
 
   // 调试：检查环境变量是否加载
   const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
-  React.useEffect(() => {
+  useEffect(() => {
     if (!siteKey) {
       console.error("❌ NEXT_PUBLIC_HCAPTCHA_SITE_KEY 未在Vercel配置");
       setError("hCaptcha配置错误，请联系管理员");
