@@ -6,6 +6,7 @@ export interface ParsedResource {
   password?: string;
   source?: string;
   category?: string;
+  pointsCost?: number;
 }
 
 export function parseResourceText(text: string): ParsedResource[] {

@@ -80,6 +80,15 @@ export default function ImportPage() {
         return;
       }
 
+      // 为每个资源设置默认积分（根据分类）
+      resources = resources.map((resource) => {
+        const pointsRange = getPointsRange(resource.category || "安全课件");
+        return {
+          ...resource,
+          pointsCost: resource.pointsCost || pointsRange.default,
+        };
+      });
+
       setParsedResources(resources);
       setShowPreview(true);
       setMessage(`成功解析 ${resources.length} 条资源`);
@@ -134,6 +143,18 @@ export default function ImportPage() {
     const updated = [...parsedResources];
     updated[index] = { ...updated[index], [field]: value };
     setParsedResources(updated);
+  };
+
+  // 分类对应的推荐积分范围
+  const getPointsRange = (category: string) => {
+    const ranges: { [key: string]: { min: number; max: number; default: number } } = {
+      "安全课件": { min: 5, max: 20, default: 10 },
+      "标准规范": { min: 1, max: 15, default: 5 },
+      "事故调查报告": { min: 1, max: 10, default: 5 },
+      "事故警示视频": { min: 3, max: 20, default: 10 },
+      "安全管理书籍": { min: 10, max: 60, default: 30 },
+    };
+    return ranges[category] || { min: 1, max: 50, default: 10 };
   };
 
   // 加载中显示
@@ -292,9 +313,13 @@ export default function ImportPage() {
                       </label>
                       <select
                         value={resource.category || ""}
-                        onChange={(e) =>
-                          updateResource(index, "category", e.target.value)
-                        }
+                        onChange={(e) => {
+                          const newCategory = e.target.value;
+                          const pointsRange = getPointsRange(newCategory);
+                          updateResource(index, "category", newCategory);
+                          // 自动更新积分为新分类的默认值
+                          updateResource(index, "pointsCost", pointsRange.default);
+                        }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="安全课件">安全课件</option>
@@ -329,6 +354,31 @@ export default function ImportPage() {
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        消耗积分
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          value={resource.pointsCost || getPointsRange(resource.category || "安全课件").default}
+                          onChange={(e) =>
+                            updateResource(index, "pointsCost", parseInt(e.target.value) || 0)
+                          }
+                          min={getPointsRange(resource.category || "安全课件").min}
+                          max={getPointsRange(resource.category || "安全课件").max}
+                          className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-500">
+                          推荐范围：{getPointsRange(resource.category || "安全课件").min}-
+                          {getPointsRange(resource.category || "安全课件").max} 点
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">
+                        根据资料价值设置合适的积分。当前分类"{resource.category || "安全课件"}"推荐默认值：
+                        {getPointsRange(resource.category || "安全课件").default} 点
+                      </p>
                     </div>
                   </div>
                 </div>
