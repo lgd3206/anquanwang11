@@ -161,8 +161,8 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-20 bg-white">
         <div className="container">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">平台特色</h2>
-          <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-gray-800">平台特色</h2>
+          <p className="text-center text-gray-600 mb-16 max-w-3xl mx-auto text-lg leading-relaxed">
             为全球安全专业人士提供高质量的学习和参考资源
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -194,8 +194,8 @@ export default function Home() {
       {/* Statistics Section */}
       <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
         <div className="container">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">平台数据</h2>
-          <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-gray-800">平台数据</h2>
+          <p className="text-center text-gray-600 mb-16 max-w-3xl mx-auto text-lg leading-relaxed">
             获得全球安全专业人士的信任
           </p>
           {!statsLoading ? (
