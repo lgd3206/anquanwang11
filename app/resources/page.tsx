@@ -31,6 +31,7 @@ function ResourcesContent() {
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("search") || ""
   );
+  const [showFreeOnly, setShowFreeOnly] = useState(false); // 新增：免积分筛选
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -57,6 +58,7 @@ function ResourcesContent() {
         const params = new URLSearchParams();
         if (selectedCategory) params.append("category", selectedCategory);
         if (searchQuery) params.append("search", searchQuery);
+        if (showFreeOnly) params.append("freeOnly", "true"); // 新增：免积分筛选
         params.append("page", page.toString());
 
         const response = await fetch(`/api/resources?${params}`);
@@ -70,7 +72,7 @@ function ResourcesContent() {
       }
     };
     fetchResources();
-  }, [selectedCategory, searchQuery, page]);
+  }, [selectedCategory, searchQuery, showFreeOnly, page]); // 添加showFreeOnly依赖
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,15 +133,31 @@ function ResourcesContent() {
                 type="button"
                 onClick={() => {
                   setSelectedCategory("");
+                  setShowFreeOnly(false);
                   setPage(1);
                 }}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedCategory === ""
+                  selectedCategory === "" && !showFreeOnly
                     ? "bg-blue-600 text-white"
                     : "bg-gray-200 text-gray-800 hover:bg-gray-300"
                 }`}
               >
                 全部分类
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory("");
+                  setShowFreeOnly(true);
+                  setPage(1);
+                }}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  showFreeOnly
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                🎁 免积分资源
               </button>
               {categories.map((cat) => (
                 <button
@@ -147,6 +165,7 @@ function ResourcesContent() {
                   type="button"
                   onClick={() => {
                     setSelectedCategory(cat.name);
+                    setShowFreeOnly(false);
                     setPage(1);
                   }}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${

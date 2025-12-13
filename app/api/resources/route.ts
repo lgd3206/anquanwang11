@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get("category");
     const search = searchParams.get("search");
+    const freeOnly = searchParams.get("freeOnly") === "true"; // 新增：免积分筛选
     const page = parseInt(searchParams.get("page") || "1");
     const limit = 12;
     const skip = (page - 1) * limit;
@@ -24,6 +25,9 @@ export async function GET(request: NextRequest) {
         { title: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
       ];
+    }
+    if (freeOnly) {
+      where.pointsCost = 0; // 筛选积分为0的资源
     }
 
     // Get resources
