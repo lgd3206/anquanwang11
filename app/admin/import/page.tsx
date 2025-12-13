@@ -1,15 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { parseResourceText, parseCSV, ParsedResource } from "@/lib/resourceParser";
 
 export default function ImportPage() {
+  const router = useRouter();
   const [importType, setImportType] = useState<"text" | "csv">("text");
   const [inputData, setInputData] = useState("");
   const [parsedResources, setParsedResources] = useState<ParsedResource[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [message, setMessage] = useState("");
+
+  // 页面加载时检查登录和管理员权限
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("请先登录");
+        router.push("/login");
+        return;
+      }
+
+      // 通过调用管理员API来验证权限
+      try {
+        const response = await fetch("/api/resources/import", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ resources: [], importType: "text" }),
+        });
+
+        if (response.status === 403) {
+          alert("无权限访问此页面");
+          router.push("/dashboard");
+          return;
+        }
+
+        if (response.status === 401) {
+          alert("登录已过期，请重新登录");
+          localStorage.removeItem("token");
+          router.push("/login");
+          return;
+        }
+
+        setChecking(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        alert("验证失败，请重新登录");
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleParse = () => {
     try {
@@ -37,9 +86,19 @@ export default function ImportPage() {
   const handleImport = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("请先登录");
+        router.push("/login");
+        return;
+      }
+
       const response = await fetch("/api/resources/import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           resources: parsedResources,
           importType,
@@ -71,6 +130,15 @@ export default function ImportPage() {
     updated[index] = { ...updated[index], [field]: value };
     setParsedResources(updated);
   };
+
+  // 加载中显示
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-gray-600">验证权限中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

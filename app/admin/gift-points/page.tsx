@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface GiftResult {
@@ -16,12 +16,62 @@ export default function GiftPointsPage() {
   const [emailsText, setEmailsText] = useState("");
   const [points, setPoints] = useState(1000);
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [results, setResults] = useState<GiftResult[]>([]);
   const [summary, setSummary] = useState<{
     total: number;
     successCount: number;
     failCount: number;
   } | null>(null);
+
+  // 页面加载时检查登录和管理员权限
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("请先登录");
+        router.push("/login");
+        return;
+      }
+
+      // 通过调用管理员API来验证权限（后端会检查）
+      try {
+        const response = await fetch("/api/admin/gift-points", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ emails: [], points: 0 }),
+        });
+
+        // 如果返回403，说明不是管理员
+        if (response.status === 403) {
+          alert("无权限访问此页面");
+          router.push("/dashboard");
+          return;
+        }
+
+        // 如果返回401，说明未登录或token过期
+        if (response.status === 401) {
+          alert("登录已过期，请重新登录");
+          localStorage.removeItem("token");
+          router.push("/login");
+          return;
+        }
+
+        // 权限验证通过
+        setChecking(false);
+      } catch (error) {
+        console.error("Auth check error:", error);
+        alert("验证失败，请重新登录");
+        router.push("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +129,15 @@ export default function GiftPointsPage() {
       setLoading(false);
     }
   };
+
+  // 加载中显示
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+        <div className="text-xl text-gray-600">验证权限中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4">
