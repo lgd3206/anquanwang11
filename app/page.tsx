@@ -2,13 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Header from "@/components/Header";
 import { Counter } from "@/app/components/Counter";
 
 export default function Home() {
-  const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
     totalResources: 1200,
     totalUsers: 500,
@@ -35,97 +32,10 @@ export default function Home() {
     fetchStats();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/resources?search=${encodeURIComponent(searchQuery)}`);
-    }
-  };
-
   return (
     <main className="flex-1">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-blue-600">安全资源分享网</div>
-
-          {/* 桌面端导航 + 搜索 */}
-          <div className="hidden md:flex gap-6 items-center flex-1 ml-12">
-            <form onSubmit={handleSearch} className="flex-1 max-w-xs">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索资源..."
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              />
-            </form>
-            <Link href="/" className="text-gray-700 hover:text-blue-600 transition">
-              首页
-            </Link>
-            <Link href="/resources" className="text-gray-700 hover:text-blue-600 transition">
-              资源库
-            </Link>
-            <Link href="/login" className="btn-primary">
-              登录
-            </Link>
-          </div>
-
-          {/* 手机端：汉堡菜单 */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
-            >
-              <span className="text-2xl">☰</span>
-            </button>
-          </div>
-        </div>
-
-        {/* 手机端下拉菜单 */}
-        {menuOpen && (
-          <div className="md:hidden border-t bg-white">
-            <div className="container py-4 space-y-4">
-              <form onSubmit={handleSearch} className="flex gap-2">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="搜索资源..."
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
-                <button
-                  type="submit"
-                  className="btn-primary"
-                >
-                  搜索
-                </button>
-              </form>
-              <Link
-                href="/"
-                className="block text-gray-700 hover:text-blue-600 transition py-2"
-                onClick={() => setMenuOpen(false)}
-              >
-                首页
-              </Link>
-              <Link
-                href="/resources"
-                className="block text-gray-700 hover:text-blue-600 transition py-2"
-                onClick={() => setMenuOpen(false)}
-              >
-                资源库
-              </Link>
-              <Link
-                href="/login"
-                className="block btn-primary text-center"
-                onClick={() => setMenuOpen(false)}
-              >
-                登录
-              </Link>
-            </div>
-          </div>
-        )}
-      </header>
+      {/* Header with search */}
+      <Header showSearch={true} />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white min-h-[80vh] flex items-center justify-center relative overflow-hidden">
@@ -222,27 +132,49 @@ export default function Home() {
           )}
         </div>
       </section>
-      <section className="bg-yellow-50 border-l-4 border-yellow-400 py-8">
+
+      {/* 重要提示 - 移到 Footer 上方，改为折叠样式 */}
+      <section className="bg-gray-100 border-t border-gray-200 py-6">
         <div className="container">
-          <h3 className="text-lg font-bold text-yellow-800 mb-2">⚠️ 重要提示</h3>
-          <p className="text-yellow-700 text-sm">
-            本网站仅为资源分享交流学习平台，所有资源均来自用户分享。用户应自行判断资源的合法性和真实性。
-            本网站不对资源内容的准确性、完整性、合法性负责。付费仅为维持网站日常服务器等正常费用。
-            用户使用本网站资源产生的任何后果，本网站不承担任何责任。
-            <Link href="/disclaimer" className="text-yellow-800 underline hover:text-yellow-900 ml-2 font-medium">
-              查看完整免责声明 →
-            </Link>
-          </p>
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer text-gray-700 hover:text-gray-900 transition">
+              <div className="flex items-center gap-2">
+                <span className="text-yellow-600">⚠️</span>
+                <span className="font-medium">重要提示与免责声明</span>
+              </div>
+              <span className="text-gray-400 group-open:rotate-180 transition-transform">
+                ▼
+              </span>
+            </summary>
+            <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600 space-y-2">
+              <p>
+                本网站仅为资源分享交流学习平台，所有资源均来自用户分享。用户应自行判断资源的合法性和真实性。
+              </p>
+              <p>
+                本网站不对资源内容的准确性、完整性、合法性负责。付费仅为维持网站日常服务器等正常费用。
+              </p>
+              <p>
+                用户使用本网站资源产生的任何后果，本网站不承担任何责任。
+              </p>
+              <Link href="/disclaimer" className="text-blue-600 underline hover:text-blue-800 font-medium inline-block mt-2">
+                查看完整免责声明 →
+              </Link>
+            </div>
+          </details>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-gray-300 py-8 mt-16">
+      <footer className="bg-gray-800 text-gray-300 py-8">
         <div className="container text-center">
           <p>&copy; 2025 安全资源分享网. 保留所有权利。</p>
           <p className="text-sm mt-4 space-x-4">
             <Link href="/disclaimer" className="hover:text-white transition">
               免责声明
+            </Link>
+            <span>|</span>
+            <Link href="/privacy" className="hover:text-white transition">
+              隐私政策
             </Link>
             <span>|</span>
             <span>仅供学习交流使用</span>

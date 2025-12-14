@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import Header from "@/components/Header";
 import Spinner from "@/components/ui/Spinner";
 import ResourceSkeleton from "@/components/ui/ResourceSkeleton";
 
@@ -105,24 +106,7 @@ function ResourcesContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            安全资源分享网
-          </Link>
-          <nav className="flex gap-6">
-            <Link href="/" className="text-gray-700 hover:text-blue-600">
-              首页
-            </Link>
-            <Link href="/resources" className="text-blue-600 font-medium">
-              资源库
-            </Link>
-            <Link href="/login" className="btn-primary">
-              登录
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main className="container py-8">
         {/* Search Section */}

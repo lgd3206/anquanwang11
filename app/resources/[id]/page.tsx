@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import Header from "@/components/Header";
 import Spinner from "@/components/ui/Spinner";
 import { safeToast } from "@/lib/toast";
 
@@ -172,13 +173,7 @@ export default function ResourceDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm sticky top-0 z-50">
-          <div className="container py-4">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              安全资源分享网
-            </Link>
-          </div>
-        </header>
+        <Header />
         <main className="container py-8 flex justify-center items-center min-h-[60vh]">
           <Spinner size="lg" />
         </main>
@@ -189,13 +184,7 @@ export default function ResourceDetailPage() {
   if (!resource) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm">
-          <div className="container py-4">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              安全资源分享网
-            </Link>
-          </div>
-        </header>
+        <Header />
         <main className="container py-8">
           <div className="bg-white rounded-lg shadow-md p-8 text-center max-w-2xl mx-auto">
             <div className="text-6xl mb-4">😢</div>
@@ -225,26 +214,7 @@ export default function ResourceDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            安全资源分享网
-          </Link>
-          <nav className="flex gap-6">
-            <Link href="/resources" className="text-gray-700 hover:text-blue-600">
-              资源库
-            </Link>
-            {userPoints !== null && (
-              <div className="text-gray-700">
-                积分: <span className="font-bold text-blue-600">{userPoints}</span>
-              </div>
-            )}
-            <Link href="/dashboard" className="btn-primary">
-              个人中心
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main className="container py-8">
         <Link href="/resources" className="text-blue-600 hover:underline mb-6 inline-block">
