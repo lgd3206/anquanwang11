@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { safeToast } from "@/lib/toast";
+import Spinner from "@/components/ui/Spinner";
 
 interface RechargePackage {
   points: number;
@@ -74,12 +76,14 @@ function RechargeContent() {
     const token = localStorage.getItem("token");
 
     if (!token) {
+      safeToast.error("请先登录");
       router.push("/login");
       return;
     }
 
     if (!selectedPackage) {
       setError("请选择充值套餐");
+      safeToast.error("请选择充值套餐");
       return;
     }
 
@@ -104,13 +108,16 @@ function RechargeContent() {
 
       if (!response.ok) {
         setError(data.message || "支付初始化失败");
+        safeToast.error(data.message || "支付初始化失败");
         return;
       }
 
       // In production, this would be a real QR code from payment provider
       setQrCode(data.qrCode || "mock-qr-code");
+      safeToast.success("支付初始化成功，请扫描二维码");
     } catch (err) {
       setError("支付过程中出错，请重试");
+      safeToast.error("支付过程中出错，请重试");
     } finally {
       setLoading(false);
     }
@@ -297,9 +304,16 @@ function RechargeContent() {
                     <button
                       onClick={handleInitiatePayment}
                       disabled={loading}
-                      className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {loading ? "处理中..." : "立即支付"}
+                      {loading ? (
+                        <>
+                          <Spinner size="sm" />
+                          <span>处理中...</span>
+                        </>
+                      ) : (
+                        "立即支付"
+                      )}
                     </button>
 
                     <p className="text-xs text-gray-500 text-center mt-4">

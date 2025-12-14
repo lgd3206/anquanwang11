@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import DashboardSkeleton from "@/components/ui/DashboardSkeleton";
 
 interface User {
   id: number;
@@ -120,8 +121,30 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">加载中...</p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Skeleton */}
+        <header className="bg-white shadow-sm">
+          <div className="container py-4 flex justify-between items-center">
+            <div className="h-8 w-40 bg-gray-300 rounded animate-pulse"></div>
+            <div className="flex gap-6 items-center">
+              <div className="h-6 w-16 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Skeleton */}
+        <main className="container py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1">
+              <DashboardSkeleton type="profile" />
+            </div>
+            <div className="lg:col-span-2">
+              <DashboardSkeleton type="table" />
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -370,7 +393,7 @@ export default function DashboardPage() {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-bold mb-4">下载历史</h2>
                 {downloadsLoading ? (
-                  <p className="text-gray-500 text-center py-8">加载中...</p>
+                  <DashboardSkeleton type="table" />
                 ) : downloads.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">暂无下载记录</p>
                 ) : (
@@ -424,7 +447,7 @@ export default function DashboardPage() {
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-bold mb-4">充值记录</h2>
                 {paymentsLoading ? (
-                  <p className="text-gray-500 text-center py-8">加载中...</p>
+                  <DashboardSkeleton type="table" />
                 ) : payments.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">暂无充值记录</p>
                 ) : (
