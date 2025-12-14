@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import Spinner from "@/components/ui/Spinner";
+import ResourceSkeleton from "@/components/ui/ResourceSkeleton";
 
 interface Category {
   id: number;
@@ -183,8 +185,8 @@ function ResourcesContent() {
 
         {/* Resources Grid */}
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">加载中...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <ResourceSkeleton count={6} />
           </div>
         ) : resources.length === 0 ? (
           <div className="text-center py-12">

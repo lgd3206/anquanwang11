@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { safeToast } from "@/lib/toast";
+import Spinner from "@/components/ui/Spinner";
 
 interface GiftResult {
   email: string;
@@ -33,7 +35,7 @@ export default function GiftPointsPage() {
       if (!token) {
         // 未登录，跳转到登录页（不设置 checking=false，保持 loading 状态）
         router.push("/login");
-        setTimeout(() => alert("请先登录"), 100);
+        setTimeout(() => safeToast.error("请先登录"), 100);
         return;
       }
 
@@ -51,7 +53,7 @@ export default function GiftPointsPage() {
         // 如果返回403，说明不是管理员
         if (response.status === 403) {
           router.push("/dashboard");
-          setTimeout(() => alert("无权限访问此页面"), 100);
+          setTimeout(() => safeToast.error("无权限访问此页面"), 100);
           return;
         }
 
@@ -59,7 +61,7 @@ export default function GiftPointsPage() {
         if (response.status === 401) {
           localStorage.removeItem("token");
           router.push("/login");
-          setTimeout(() => alert("登录已过期，请重新登录"), 100);
+          setTimeout(() => safeToast.error("登录已过期，请重新登录"), 100);
           return;
         }
 
@@ -69,7 +71,7 @@ export default function GiftPointsPage() {
       } catch (error) {
         console.error("Auth check error:", error);
         router.push("/login");
-        setTimeout(() => alert("验证失败，请重新登录"), 100);
+        setTimeout(() => safeToast.error("验证失败，请重新登录"), 100);
       }
     };
 
@@ -90,14 +92,14 @@ export default function GiftPointsPage() {
         .filter((email) => email.length > 0);
 
       if (emails.length === 0) {
-        alert("请输入至少一个邮箱");
+        safeToast.error("请输入至少一个邮箱");
         setLoading(false);
         return;
       }
 
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("请先登录");
+        safeToast.error("请先登录");
         router.push("/login");
         return;
       }
@@ -114,7 +116,7 @@ export default function GiftPointsPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "赠送失败");
+        safeToast.error(data.message || "赠送失败");
         setLoading(false);
         return;
       }
@@ -127,7 +129,7 @@ export default function GiftPointsPage() {
       });
     } catch (error) {
       console.error("Gift points error:", error);
-      alert("赠送失败，请稍后重试");
+      safeToast.error("赠送失败，请稍后重试");
     } finally {
       setLoading(false);
     }

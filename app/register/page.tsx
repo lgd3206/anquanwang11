@@ -4,6 +4,10 @@ import { useState, Suspense, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { safeToast } from "@/lib/toast";
+import FormError from "@/components/ui/FormError";
+import FormSuccess from "@/components/ui/FormSuccess";
+import Spinner from "@/components/ui/Spinner";
 
 function RegisterContent() {
   const router = useRouter();
@@ -17,7 +21,13 @@ function RegisterContent() {
   });
   const [captchaToken, setCaptchaToken] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 实时验证错误状态
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   // 调试：检查环境变量是否加载
   const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY;
@@ -36,6 +46,38 @@ function RegisterContent() {
       ...prev,
       [name]: value,
     }));
+
+    // 实时验证
+    if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value && !emailRegex.test(value)) {
+        setEmailError("请输入有效的邮箱地址");
+      } else {
+        setEmailError("");
+      }
+    }
+
+    if (name === "password") {
+      if (value && value.length < 6) {
+        setPasswordError("密码至少6个字符");
+      } else {
+        setPasswordError("");
+      }
+      // 同时验证确认密码
+      if (formData.confirmPassword && value !== formData.confirmPassword) {
+        setConfirmPasswordError("两次输入的密码不一致");
+      } else {
+        setConfirmPasswordError("");
+      }
+    }
+
+    if (name === "confirmPassword") {
+      if (value && value !== formData.password) {
+        setConfirmPasswordError("两次输入的密码不一致");
+      } else {
+        setConfirmPasswordError("");
+      }
+    }
   };
 
   const handleCaptchaChange = (token: string) => {
@@ -45,11 +87,13 @@ function RegisterContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     // 验证密码
     if (formData.password !== formData.confirmPassword) {
       setError("两次输入的密码不一致");
+      safeToast.error("两次输入的密码不一致");
       setLoading(false);
       return;
     }
@@ -57,6 +101,7 @@ function RegisterContent() {
     // 验证hCaptcha
     if (!captchaToken) {
       setError("请完成人类验证");
+      safeToast.error("请完成人类验证");
       setLoading(false);
       return;
     }
@@ -71,6 +116,7 @@ function RegisterContent() {
 
       if (!captchaVerifyResponse.ok) {
         setError("人类验证失败，请重试");
+        safeToast.error("人类验证失败，请重试");
         // 重置captcha
         captchaRef.current?.resetCaptcha();
         return;
@@ -91,15 +137,21 @@ function RegisterContent() {
 
       if (!response.ok) {
         setError(data.message || "注册失败");
+        safeToast.error(data.message || "注册失败");
         // 重置captcha以便重试
         captchaRef.current?.resetCaptcha();
         return;
       }
 
       // 注册成功
-      router.push("/login?registered=true");
+      setSuccess("注册成功！正在跳转到登录页面...");
+      safeToast.success("注册成功！请检查邮箱验证");
+      setTimeout(() => {
+        router.push("/login?registered=true");
+      }, 1500);
     } catch (err) {
       setError("注册过程中出错，请重试");
+      safeToast.error("注册过程中出错，请重试");
       captchaRef.current?.resetCaptcha();
     } finally {
       setLoading(false);
@@ -113,11 +165,8 @@ function RegisterContent() {
           注册账户
         </h1>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
+        <FormError message={error} />
+        <FormSuccess message={success} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -133,6 +182,7 @@ function RegisterContent() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="your@email.com"
             />
+            {emailError && <FormError message={emailError} className="mt-1" />}
           </div>
 
           <div>
@@ -162,6 +212,7 @@ function RegisterContent() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="至少6个字符"
             />
+            {passwordError && <FormError message={passwordError} className="mt-1" />}
           </div>
 
           <div>
@@ -177,6 +228,7 @@ function RegisterContent() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="再次输入密码"
             />
+            {confirmPasswordError && <FormError message={confirmPasswordError} className="mt-1" />}
           </div>
 
           {/* hCaptcha 组件 */}
@@ -197,9 +249,16 @@ function RegisterContent() {
           <button
             type="submit"
             disabled={loading || !captchaToken}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? "注册中..." : "注册"}
+            {loading ? (
+              <>
+                <Spinner size="sm" />
+                <span>注册中...</span>
+              </>
+            ) : (
+              "注册"
+            )}
           </button>
         </form>
 
