@@ -89,7 +89,7 @@ export async function DELETE(
         category: true,
         _count: {
           select: {
-            downloads: true,
+            downloadRecords: true,
           },
         },
       },
@@ -119,7 +119,7 @@ export async function DELETE(
         id: resource.id,
         title: resource.title,
         category: resource.category.name,
-        downloadsCount: resource._count.downloads,
+        downloadsCount: resource._count.downloadRecords,
       },
     });
   } catch (error) {
