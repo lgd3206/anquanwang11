@@ -142,9 +142,20 @@ export default function ImportPage() {
   };
 
   const updateResource = (index: number, field: string, value: any) => {
-    const updated = [...parsedResources];
-    updated[index] = { ...updated[index], [field]: value };
-    setParsedResources(updated);
+    setParsedResources(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  // 一次性更新多个字段，避免状态竞态问题
+  const updateResourceMultiple = (index: number, updates: Record<string, any>) => {
+    setParsedResources(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], ...updates };
+      return updated;
+    });
   };
 
   // 分类对应的推荐积分范围
@@ -318,9 +329,11 @@ export default function ImportPage() {
                         onChange={(e) => {
                           const newCategory = e.target.value;
                           const pointsRange = getPointsRange(newCategory);
-                          updateResource(index, "category", newCategory);
-                          // 自动更新积分为新分类的默认值
-                          updateResource(index, "pointsCost", pointsRange.default);
+                          // 一次性更新分类和积分，避免状态竞态
+                          updateResourceMultiple(index, {
+                            category: newCategory,
+                            pointsCost: pointsRange.default
+                          });
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
