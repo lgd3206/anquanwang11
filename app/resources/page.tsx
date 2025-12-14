@@ -37,16 +37,24 @@ function ResourcesContent() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(""); // 新增：错误状态
+  const [categoriesError, setCategoriesError] = useState(""); // 新增：分类加载错误
 
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
+      setCategoriesError("");
       try {
         const response = await fetch("/api/categories");
+        if (!response.ok) {
+          setCategoriesError("加载分类失败");
+          return;
+        }
         const data = await response.json();
         setCategories(data.categories);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
+        setCategoriesError("网络错误，请检查您的连接");
       }
     };
     fetchCategories();
@@ -56,6 +64,7 @@ function ResourcesContent() {
   useEffect(() => {
     const fetchResources = async () => {
       setLoading(true);
+      setError("");
       try {
         const params = new URLSearchParams();
         if (selectedCategory) params.append("category", selectedCategory);
@@ -64,11 +73,16 @@ function ResourcesContent() {
         params.append("page", page.toString());
 
         const response = await fetch(`/api/resources?${params}`);
+        if (!response.ok) {
+          setError("加载资源失败，请稍后重试");
+          return;
+        }
         const data = await response.json();
         setResources(data.resources);
         setTotalPages(data.pagination.pages);
       } catch (error) {
         console.error("Failed to fetch resources:", error);
+        setError("网络错误，请检查您的连接");
       } finally {
         setLoading(false);
       }
@@ -161,6 +175,17 @@ function ResourcesContent() {
               >
                 🎁 免积分资源
               </button>
+              {categoriesError && (
+                <div className="w-full mt-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center justify-between">
+                  <span>{categoriesError}</span>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                  >
+                    重试
+                  </button>
+                </div>
+              )}
               {categories.map((cat) => (
                 <button
                   key={cat.id}
@@ -188,9 +213,29 @@ function ResourcesContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <ResourceSkeleton count={6} />
           </div>
+        ) : error ? (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">{error}</h2>
+            <p className="text-gray-600 mb-6">
+              请检查您的网络连接或稍后重试
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="btn-primary"
+            >
+              重新加载
+            </button>
+          </div>
         ) : resources.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">暂无资源</p>
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <div className="text-6xl mb-4">📭</div>
+            <p className="text-gray-500 text-lg mb-4">暂无资源</p>
+            <p className="text-gray-400 text-sm">
+              {selectedCategory || searchQuery
+                ? "尝试调整搜索条件或查看其他分类"
+                : "管理员还没有上传任何资源"}
+            </p>
           </div>
         ) : (
           <>

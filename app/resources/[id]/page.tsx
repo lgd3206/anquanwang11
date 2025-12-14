@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import Spinner from "@/components/ui/Spinner";
+import { safeToast } from "@/lib/toast";
 
 interface Resource {
   id: number;
@@ -44,16 +46,20 @@ export default function ResourceDetailPage() {
 
   useEffect(() => {
     const fetchResource = async () => {
+      setLoading(true);
+      setError("");
       try {
         const response = await fetch(`/api/resources/${resourceId}`);
         if (!response.ok) {
-          setError("资源不存在");
+          const data = await response.json();
+          setError(data.message || "资源不存在");
           return;
         }
         const data = await response.json();
         setResource(data.resource);
       } catch (err) {
-        setError("加载资源失败");
+        console.error("Failed to fetch resource:", err);
+        setError("网络错误，请检查您的连接");
       } finally {
         setLoading(false);
       }
@@ -88,6 +94,7 @@ export default function ResourceDetailPage() {
     const token = localStorage.getItem("token");
 
     if (!token) {
+      safeToast.error("请先登录");
       router.push("/login");
       return;
     }
@@ -108,6 +115,22 @@ export default function ResourceDetailPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401) {
+          safeToast.error("登录已过期，请重新登录");
+          localStorage.removeItem("token");
+          router.push("/login");
+          return;
+        }
+
+        if (response.status === 400 && data.required) {
+          safeToast.error(
+            `积分不足！需要 ${data.required} 点，当前 ${data.current} 点`
+          );
+          setError(`积分不足！需要 ${data.required} 点，当前 ${data.current} 点`);
+          return;
+        }
+
+        safeToast.error(data.message || "下载失败");
         setError(data.message || "下载失败");
         return;
       }
@@ -117,12 +140,22 @@ export default function ResourceDetailPage() {
         password: data.resource.password,
         backupLink1: data.resource.backupLink1,
         backupLink2: data.resource.backupLink2,
-        pointsSpent: data.pointsSpent,
-        remainingPoints: data.remainingPoints,
+        pointsSpent: data.pointsSpent || 0,
+        remainingPoints: data.remainingPoints || userPoints || 0,
       });
 
-      setUserPoints(data.remainingPoints);
+      setUserPoints(data.remainingPoints || userPoints);
+
+      if (data.message === "您已下载过此资源") {
+        safeToast.success("已为您显示下载链接");
+      } else {
+        safeToast.success(
+          `下载成功！消耗 ${data.pointsSpent} 点，剩余 ${data.remainingPoints} 点`
+        );
+      }
     } catch (err) {
+      console.error("Download error:", err);
+      safeToast.error("下载失败，请稍后重试");
       setError("下载过程中出错，请重试");
     } finally {
       setDownloading(false);
@@ -138,8 +171,17 @@ export default function ResourceDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">加载中...</p>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm sticky top-0 z-50">
+          <div className="container py-4">
+            <Link href="/" className="text-2xl font-bold text-blue-600">
+              安全资源分享网
+            </Link>
+          </div>
+        </header>
+        <main className="container py-8 flex justify-center items-center min-h-[60vh]">
+          <Spinner size="lg" />
+        </main>
       </div>
     );
   }
@@ -155,11 +197,25 @@ export default function ResourceDetailPage() {
           </div>
         </header>
         <main className="container py-8">
-          <div className="text-center">
-            <p className="text-gray-500 text-lg mb-4">{error || "资源不存在"}</p>
-            <Link href="/resources" className="btn-primary">
-              返回资源库
-            </Link>
+          <div className="bg-white rounded-lg shadow-md p-8 text-center max-w-2xl mx-auto">
+            <div className="text-6xl mb-4">😢</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {error || "资源不存在"}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              该资源可能已被删除或您输入的链接有误
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-primary"
+              >
+                重新加载
+              </button>
+              <Link href="/resources" className="btn-primary">
+                返回资源库
+              </Link>
+            </div>
           </div>
         </main>
       </div>
@@ -343,9 +399,16 @@ export default function ResourceDetailPage() {
                 <button
                   onClick={handleDownload}
                   disabled={downloading || (userPoints !== null && userPoints < resource.pointsCost)}
-                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {downloading ? "下载中..." : "立即下载"}
+                  {downloading ? (
+                    <>
+                      <Spinner size="sm" />
+                      <span>下载中...</span>
+                    </>
+                  ) : (
+                    "立即下载"
+                  )}
                 </button>
               ) : (
                 <button
