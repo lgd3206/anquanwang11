@@ -5,11 +5,11 @@ import Link from "next/link";
 
 interface DeleteRecord {
   id: number;
-  deletedEmail: string;
-  reason: string;
-  operatorEmail: string;
+  deletedUserEmail: string;
   deletedAt: string;
-  description: string;
+  pointsAdded: number;
+  amount: number;
+  status: string;
 }
 
 export default function DeleteUserPage() {
@@ -361,9 +361,8 @@ export default function DeleteUserPage() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">删除时间</th>
-                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">被删除邮箱</th>
-                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">操作者</th>
-                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">删除原因</th>
+                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">被删除用户邮箱</th>
+                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">状态</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -373,13 +372,16 @@ export default function DeleteUserPage() {
                             {new Date(record.deletedAt).toLocaleString()}
                           </td>
                           <td className="px-6 py-4 text-sm font-mono text-gray-800">
-                            {record.deletedEmail}
+                            {record.deletedUserEmail}
                           </td>
-                          <td className="px-6 py-4 text-sm font-mono text-gray-600">
-                            {record.operatorEmail}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                            {record.reason}
+                          <td className="px-6 py-4 text-sm">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              record.status === "success"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}>
+                              {record.status}
+                            </span>
                           </td>
                         </tr>
                       ))}

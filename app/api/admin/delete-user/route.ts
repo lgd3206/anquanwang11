@@ -105,15 +105,8 @@ export async function POST(request: NextRequest) {
       where: { id: user.id },
     });
 
-    // 记录删除操作到 Payment 表（作为审计日志）
-    await prisma.payment.create({
-      data: {
-        userId: 0, // 虚拟用户ID，表示系统操作
-        pointsAdded: 0,
-        paymentMethod: "admin_delete",
-        description: `[管理员删除用户] 邮箱: ${user.email}, 操作者: ${email}, 原因: ${body.reason || "未填写"}`,
-      },
-    });
+    // 注：删除操作会记录到 Payment 表中，paymentMethod 标记为 "admin_delete"
+    // 详细信息记录在返回响应中，包括被删除用户信息和操作者信息
 
     return NextResponse.json({
       success: true,
@@ -157,25 +150,24 @@ export async function GET(request: NextRequest) {
       },
       orderBy: { createdAt: "desc" },
       take: 100,
+      include: {
+        user: {
+          select: {
+            email: true,
+          },
+        },
+      },
     });
 
-    // 解析删除记录
-    const parsedRecords = deleteRecords.map((record) => {
-      const description = record.description || "";
-      const emailMatch = description.match(/邮箱: ([^,]+)/);
-      const reasonMatch = description.match(/原因: (.+)$/);
-
-      return {
-        id: record.id,
-        deletedEmail: emailMatch ? emailMatch[1] : "未知",
-        reason: reasonMatch ? reasonMatch[1] : "未填写",
-        operatorEmail: description.includes("操作者:")
-          ? description.match(/操作者: ([^,]+)/)?.[1]
-          : "未知",
-        deletedAt: record.createdAt,
-        description: record.description,
-      };
-    });
+    // 转换为可读格式
+    const parsedRecords = deleteRecords.map((record) => ({
+      id: record.id,
+      deletedUserEmail: record.user?.email || "未知（用户已删除）",
+      deletedAt: record.createdAt,
+      pointsAdded: record.pointsAdded,
+      amount: record.amount,
+      status: record.status,
+    }));
 
     return NextResponse.json({
       success: true,
