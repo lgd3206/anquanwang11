@@ -237,20 +237,43 @@ function ResourcesContent() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mb-8">
+              <div className="flex justify-center items-center gap-1 md:gap-2 mb-8 overflow-x-auto px-4">
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                  className="px-3 md:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 whitespace-nowrap text-sm md:text-base flex-shrink-0"
                 >
                   上一页
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (p) => (
+
+                {/* 第一页 */}
+                {page > 3 && (
+                  <>
+                    <button
+                      onClick={() => setPage(1)}
+                      className="px-3 md:px-4 py-2 rounded-lg font-medium border border-gray-300 hover:bg-gray-100 text-sm md:text-base flex-shrink-0"
+                    >
+                      1
+                    </button>
+                    {page > 4 && (
+                      <span className="px-2 text-gray-500">...</span>
+                    )}
+                  </>
+                )}
+
+                {/* 当前页附近的页码 */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => {
+                    // 移动端：显示当前页和前后各1页
+                    // 桌面端：显示当前页和前后各2页
+                    const range = window.innerWidth < 768 ? 1 : 2;
+                    return p >= page - range && p <= page + range;
+                  })
+                  .map((p) => (
                     <button
                       key={p}
                       onClick={() => setPage(p)}
-                      className={`px-4 py-2 rounded-lg font-medium ${
+                      className={`px-3 md:px-4 py-2 rounded-lg font-medium text-sm md:text-base flex-shrink-0 ${
                         page === p
                           ? "bg-blue-600 text-white"
                           : "border border-gray-300 hover:bg-gray-100"
@@ -258,12 +281,27 @@ function ResourcesContent() {
                     >
                       {p}
                     </button>
-                  )
+                  ))}
+
+                {/* 最后一页 */}
+                {page < totalPages - 2 && (
+                  <>
+                    {page < totalPages - 3 && (
+                      <span className="px-2 text-gray-500">...</span>
+                    )}
+                    <button
+                      onClick={() => setPage(totalPages)}
+                      className="px-3 md:px-4 py-2 rounded-lg font-medium border border-gray-300 hover:bg-gray-100 text-sm md:text-base flex-shrink-0"
+                    >
+                      {totalPages}
+                    </button>
+                  </>
                 )}
+
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+                  className="px-3 md:px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 whitespace-nowrap text-sm md:text-base flex-shrink-0"
                 >
                   下一页
                 </button>
