@@ -37,7 +37,7 @@ export function getMailer(): Transporter {
 export async function sendVerificationEmail(
   email: string,
   verificationToken: string,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || 'https://www.sora3ai.online'
 ): Promise<boolean> {
   try {
     const verificationUrl = `${appUrl}/api/auth/verify?token=${verificationToken}&email=${encodeURIComponent(email)}`;
@@ -101,7 +101,7 @@ export async function sendVerificationEmail(
 export async function sendBonusEmail(
   email: string,
   bonusPoints: number,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || 'https://www.sora3ai.online'
 ): Promise<boolean> {
   try {
     const mailer = getMailer();
