@@ -165,7 +165,11 @@ export default function ImportPage() {
       "标准规范": { min: 1, max: 15, default: 5 },
       "事故调查报告": { min: 1, max: 10, default: 5 },
       "事故警示视频": { min: 3, max: 20, default: 10 },
-      "安全管理书籍": { min: 10, max: 60, default: 30 },
+      "安全书籍": { min: 10, max: 60, default: 30 },
+      "制度规程": { min: 1, max: 20, default: 5 },
+      "检查表": { min: 1, max: 10, default: 3 },
+      "注安": { min: 10, max: 50, default: 20 },
+      "消防": { min: 5, max: 30, default: 15 },
     };
     return ranges[category] || { min: 1, max: 50, default: 10 };
   };
@@ -337,11 +341,16 @@ export default function ImportPage() {
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
+                        <option value="">选择分类...</option>
                         <option value="安全课件">安全课件</option>
-                        <option value="事故调查报告">事故调查报告</option>
                         <option value="标准规范">标准规范</option>
+                        <option value="事故调查报告">事故调查报告</option>
                         <option value="事故警示视频">事故警示视频</option>
-                        <option value="安全管理书籍">安全管理书籍</option>
+                        <option value="安全书籍">安全书籍</option>
+                        <option value="制度规程">制度规程</option>
+                        <option value="检查表">检查表</option>
+                        <option value="注安">注安</option>
+                        <option value="消防">消防</option>
                       </select>
                     </div>
                     <div>

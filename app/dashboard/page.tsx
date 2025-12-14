@@ -329,9 +329,29 @@ export default function DashboardPage() {
                           <td className="px-4 py-3 text-gray-600">警示教育视频</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-3">安全管理书籍</td>
+                          <td className="px-4 py-3">安全书籍</td>
                           <td className="px-4 py-3 font-bold text-blue-600">10-60</td>
                           <td className="px-4 py-3 text-gray-600">专业电子书籍</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">制度规程</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-20</td>
+                          <td className="px-4 py-3 text-gray-600">企业制度、规程文件</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">检查表</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-10</td>
+                          <td className="px-4 py-3 text-gray-600">安全检查表、清单</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">注安</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">10-50</td>
+                          <td className="px-4 py-3 text-gray-600">注册安全工程师资料</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">消防</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
+                          <td className="px-4 py-3 text-gray-600">消防安全相关资料</td>
                         </tr>
                       </tbody>
                     </table>
