@@ -13,7 +13,9 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:seed": "ts-node scripts/seed-db.ts",
-    "db:setup": "npm run prisma:generate && npm run prisma:migrate && npm run db:seed"
+    "db:setup": "npm run prisma:generate && npm run prisma:migrate && npm run db:seed",
+    "check-test-resources": "ts-node scripts/check-test-resources.ts",
+    "delete-test-resources": "ts-node scripts/delete-test-resources.ts"
   },
   "keywords": [],
   "author": "",
