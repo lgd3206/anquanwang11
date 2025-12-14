@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { resourceImportSchema, validateInput } from "@/lib/validation";
+import { findDuplicates } from "@/lib/deduplication";
 
 const prisma = new PrismaClient();
 
@@ -51,6 +52,60 @@ export async function POST(request: NextRequest) {
     let successCount = 0;
     let failedCount = 0;
     const errors: string[] = [];
+    const duplicates: Array<{
+      index: number;
+      title: string;
+      link: string;
+      existingId: number;
+      existingTitle: string;
+      duplicateType: "link" | "title";
+      reason: string;
+    }> = [];
+
+    // 获取所有现有资源用于查重
+    const existingResources = await prisma.resource.findMany({
+      select: {
+        id: true,
+        title: true,
+        mainLink: true,
+        categoryId: true,
+        pointsCost: true,
+      },
+    });
+
+    // 检查重复
+    const duplicateResults = findDuplicates(
+      resources.map((r) => ({ title: r.title, link: r.link })),
+      existingResources,
+      0.8 // 80% 相似度阈值
+    );
+
+    for (const dup of duplicateResults) {
+      duplicates.push({
+        index: dup.resourceIndex,
+        title: dup.title,
+        link: dup.link,
+        existingId: dup.duplicateInfo.duplicate.id,
+        existingTitle: dup.duplicateInfo.duplicate.title,
+        duplicateType: dup.duplicateInfo.type as "link" | "title",
+        reason: dup.duplicateInfo.reason,
+      });
+    }
+
+    // 如果有重复资源，返回重复信息，不执行导入
+    if (duplicates.length > 0) {
+      return NextResponse.json(
+        {
+          message: "检测到重复资源，请查证后重新导入",
+          hasDuplicates: true,
+          duplicateCount: duplicates.length,
+          duplicates: duplicates,
+          successCount: 0,
+          failedCount: 0,
+        },
+        { status: 200 }
+      );
+    }
 
     for (const resource of resources) {
       try {

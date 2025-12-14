@@ -14,6 +14,15 @@ export default function ImportPage() {
   const [checking, setChecking] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [message, setMessage] = useState("");
+  const [duplicates, setDuplicates] = useState<Array<{
+    index: number;
+    title: string;
+    link: string;
+    existingId: number;
+    existingTitle: string;
+    duplicateType: "link" | "title";
+    reason: string;
+  }> | null>(null);
 
   // 页面加载时检查登录和管理员权限
   useEffect(() => {
@@ -123,6 +132,16 @@ export default function ImportPage() {
 
       const data = await response.json();
 
+      // 检查是否有重复资源
+      if (data.hasDuplicates && data.duplicates) {
+        setDuplicates(data.duplicates);
+        setMessage(
+          `⚠️ 检测到 ${data.duplicateCount} 个重复资源，请查证后重新导入`
+        );
+        setLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         setMessage(`导入失败: ${data.message}`);
         return;
@@ -134,6 +153,7 @@ export default function ImportPage() {
       setInputData("");
       setParsedResources([]);
       setShowPreview(false);
+      setDuplicates(null);
     } catch (error) {
       setMessage(`导入过程中出错: ${error}`);
     } finally {
@@ -249,12 +269,58 @@ export default function ImportPage() {
               {message && (
                 <div
                   className={`mb-4 px-4 py-3 rounded-lg ${
-                    message.includes("失败") || message.includes("错误")
-                      ? "bg-red-50 text-red-700 border border-red-200"
+                    message.includes("失败") || message.includes("错误") || message.includes("检测到")
+                      ? message.includes("检测到")
+                        ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                        : "bg-red-50 text-red-700 border border-red-200"
                       : "bg-green-50 text-green-700 border border-green-200"
                   }`}
                 >
                   {message}
+                </div>
+              )}
+
+              {/* 重复资源警告 */}
+              {duplicates && duplicates.length > 0 && (
+                <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
+                  <h3 className="font-bold text-red-800 mb-3">
+                    ⚠️ 检测到 {duplicates.length} 个重复资源
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-red-700">
+                      <thead className="bg-red-100">
+                        <tr>
+                          <th className="px-2 py-2 text-left">序号</th>
+                          <th className="px-2 py-2 text-left">新资源标题</th>
+                          <th className="px-2 py-2 text-left">重复类型</th>
+                          <th className="px-2 py-2 text-left">已有资源</th>
+                          <th className="px-2 py-2 text-left">原因</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-red-200">
+                        {duplicates.map((dup, idx) => (
+                          <tr key={idx} className="hover:bg-red-100">
+                            <td className="px-2 py-2">{dup.index + 1}</td>
+                            <td className="px-2 py-2 truncate max-w-xs">{dup.title}</td>
+                            <td className="px-2 py-2">
+                              <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                                dup.duplicateType === "link"
+                                  ? "bg-red-200 text-red-900"
+                                  : "bg-orange-200 text-orange-900"
+                              }`}>
+                                {dup.duplicateType === "link" ? "链接重复" : "标题相似"}
+                              </span>
+                            </td>
+                            <td className="px-2 py-2 truncate max-w-xs">{dup.existingTitle}</td>
+                            <td className="px-2 py-2">{dup.reason}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-3 text-sm text-red-700">
+                    请删除重复资源或修改其标题/链接后重新导入
+                  </p>
                 </div>
               )}
 
