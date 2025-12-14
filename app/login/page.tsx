@@ -3,6 +3,10 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { safeToast } from "@/lib/toast";
+import FormError from "@/components/ui/FormError";
+import FormSuccess from "@/components/ui/FormSuccess";
+import Spinner from "@/components/ui/Spinner";
 
 function LoginContent() {
   const router = useRouter();
@@ -14,7 +18,12 @@ function LoginContent() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 实时验证错误状态
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -22,11 +31,30 @@ function LoginContent() {
       ...prev,
       [name]: value,
     }));
+
+    // 实时验证
+    if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value && !emailRegex.test(value)) {
+        setEmailError("请输入有效的邮箱地址");
+      } else {
+        setEmailError("");
+      }
+    }
+
+    if (name === "password") {
+      if (value && value.length < 6) {
+        setPasswordError("密码至少6个字符");
+      } else {
+        setPasswordError("");
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
@@ -40,14 +68,20 @@ function LoginContent() {
 
       if (!response.ok) {
         setError(data.message || "登录失败");
+        safeToast.error(data.message || "登录失败");
         return;
       }
 
       // Store token
       localStorage.setItem("token", data.token);
-      router.push("/dashboard");
+      setSuccess("登录成功！正在跳转...");
+      safeToast.success("登录成功！");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1000);
     } catch (err) {
       setError("登录过程中出错，请重试");
+      safeToast.error("登录过程中出错，请重试");
     } finally {
       setLoading(false);
     }
@@ -61,16 +95,11 @@ function LoginContent() {
         </h1>
 
         {registered && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-            注册成功！请登录您的账户
-          </div>
+          <FormSuccess message="注册成功！请登录您的账户" />
         )}
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
+        <FormError message={error} />
+        <FormSuccess message={success} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -86,6 +115,7 @@ function LoginContent() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="your@email.com"
             />
+            {emailError && <FormError message={emailError} className="mt-1" />}
           </div>
 
           <div>
@@ -101,14 +131,22 @@ function LoginContent() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="输入密码"
             />
+            {passwordError && <FormError message={passwordError} className="mt-1" />}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? "登录中..." : "登录"}
+            {loading ? (
+              <>
+                <Spinner size="sm" />
+                <span>登录中...</span>
+              </>
+            ) : (
+              "登录"
+            )}
           </button>
         </form>
 
