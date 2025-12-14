@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   description: "专业的安全资源分享平台",
   verification: {
     google: "814a080f1f4dc9d1",
-    baidu: "codeva-FQ3bvSq1cS",
   },
 };
 
@@ -20,6 +19,9 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
+        {/* Baidu Search Console Verification */}
+        <meta name="baidu-site-verification" content="codeva-FQ3bvSq1cS" />
+
         {/* Google Analytics */}
         <Script
           async
