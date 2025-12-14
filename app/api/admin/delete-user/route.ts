@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
 /**
  * 管理员用户删除 API
  * POST: 删除用户及其关联数据
  * GET: 查询删除历史记录
  */
+
+const prisma = new PrismaClient();
 
 // 管理员邮箱白名单
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim()).filter(Boolean);
