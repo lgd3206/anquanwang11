@@ -6,6 +6,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "安全资源分享网",
   description: "专业的安全资源分享平台",
+  verification: {
+    google: "814a080f1f4dc9d1",
+    baidu: "codeva-FQ3bvSq1cS",
+  },
 };
 
 export default function RootLayout({
