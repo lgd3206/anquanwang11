@@ -102,7 +102,7 @@ export function findDuplicates(
     resourceIndex: number;
     title: string;
     link: string;
-    duplicateInfo: ReturnType<typeof findDuplicate>;
+    duplicateInfo: NonNullable<ReturnType<typeof findDuplicate>>;
   }> = [];
 
   for (let i = 0; i < resourcesToImport.length; i++) {
