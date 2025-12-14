@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "安全资源分享网",
   description: "专业的安全资源分享平台",
   verification: {
-    google: "814a080f1f4dc9d1",
+    google: "f9FYb8VhqPzhSraCXIllZf0E5nYGlfe2r2xMes11DVQ",
   },
 };
 
