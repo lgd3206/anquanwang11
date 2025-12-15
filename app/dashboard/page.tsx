@@ -516,14 +516,14 @@ export default function DashboardPage() {
                             <td className="px-4 py-3">
                               <span
                                 className={`px-2 py-1 rounded text-xs font-bold ${
-                                  payment.status === "success"
+                                  payment.status === "completed"
                                     ? "bg-green-100 text-green-800"
                                     : payment.status === "pending"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-red-100 text-red-800"
                                 }`}
                               >
-                                {payment.status === "success"
+                                {payment.status === "completed"
                                   ? "成功"
                                   : payment.status === "pending"
                                   ? "待支付"

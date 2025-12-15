@@ -376,11 +376,13 @@ export default function DeleteUserPage() {
                           </td>
                           <td className="px-6 py-4 text-sm">
                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              record.status === "success"
+                              record.status === "completed"
                                 ? "bg-green-100 text-green-800"
+                                : record.status === "pending"
+                                ? "bg-yellow-100 text-yellow-800"
                                 : "bg-gray-100 text-gray-800"
                             }`}>
-                              {record.status}
+                              {record.status === "completed" ? "已完成" : record.status === "pending" ? "处理中" : record.status}
                             </span>
                           </td>
                         </tr>
