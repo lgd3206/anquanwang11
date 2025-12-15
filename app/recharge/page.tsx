@@ -453,7 +453,7 @@ function RechargeContent() {
                           <span className="text-gray-600">获得积分:</span>
                           <span className="font-bold text-blue-600">
                             {selectedPackage?.points}
-                            {isFirstRecharge && (
+                            {isFirstRecharge && selectedPackage && (
                               <span className="text-green-600">
                                 {" "}+ {Math.floor(selectedPackage.points * 0.3)} (首充)
                               </span>
