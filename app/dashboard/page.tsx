@@ -372,9 +372,10 @@ export default function DashboardPage() {
                       { points: 100, price: 9.9 },
                       { points: 300, price: 24.9, badge: "推荐" },
                       { points: 500, price: 39.9 },
-                      { points: 1000, price: 59.9, badge: "热销" },
-                      { points: 2000, price: 99.9 },
-                      { points: 5000, price: 199.9, badge: "最划算" },
+                      { points: 1000, price: 69.9, badge: "超值" },
+                      { points: 2000, price: 129.9 },
+                      { points: 5000, price: 299.9, badge: "VIP" },
+                      { points: 10000, price: 499.9, badge: "至尊" },
                     ].map((plan) => (
                       <div
                         key={plan.points}
