@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       const emailSent = await sendVerificationEmail(
         normalizedEmail,
         verificationToken,
-        process.env.NEXT_PUBLIC_APP_URL || "https://www.sora3ai.online"
+        process.env.NEXT_PUBLIC_APP_URL || "https://www.hseshare.com"
       );
 
       if (emailSent) {
