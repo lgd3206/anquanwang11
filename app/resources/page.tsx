@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Spinner from "@/components/ui/Spinner";
 import ResourceSkeleton from "@/components/ui/ResourceSkeleton";
@@ -26,6 +26,7 @@ interface Resource {
 
 function ResourcesContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(
@@ -34,12 +35,32 @@ function ResourcesContent() {
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("search") || ""
   );
-  const [showFreeOnly, setShowFreeOnly] = useState(false); // 新增：免积分筛选
-  const [page, setPage] = useState(1);
+  const [showFreeOnly, setShowFreeOnly] = useState(
+    searchParams.get("freeOnly") === "true"
+  );
+  const [page, setPage] = useState(
+    parseInt(searchParams.get("page") || "1")
+  );
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(""); // 新增：错误状态
   const [categoriesError, setCategoriesError] = useState(""); // 新增：分类加载错误
+
+  // 同步筛选条件到URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (selectedCategory) params.set("category", selectedCategory);
+    if (searchQuery) params.set("search", searchQuery);
+    if (showFreeOnly) params.set("freeOnly", "true");
+    if (page > 1) params.set("page", page.toString());
+
+    const queryString = params.toString();
+    const newUrl = queryString ? `/resources?${queryString}` : "/resources";
+
+    // 使用 replace 而不是 push，避免污染浏览器历史
+    router.replace(newUrl, { scroll: false });
+  }, [selectedCategory, searchQuery, showFreeOnly, page, router]);
 
   // Fetch categories
   useEffect(() => {
