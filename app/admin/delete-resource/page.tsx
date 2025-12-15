@@ -37,7 +37,8 @@ export default function DeleteResourcePage() {
       }
 
       try {
-        const response = await fetch("/api/user/profile", {
+        // 调用管理员检查API
+        const response = await fetch("/api/admin/check", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -49,9 +50,8 @@ export default function DeleteResourcePage() {
         }
 
         const data = await response.json();
-        const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(",") || [];
 
-        if (!adminEmails.includes(data.user.email)) {
+        if (!data.isAdmin) {
           router.push("/dashboard");
           alert("无权限访问此页面");
           return;
