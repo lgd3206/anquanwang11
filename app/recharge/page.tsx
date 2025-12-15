@@ -15,8 +15,11 @@ function RechargeContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [paymentId, setPaymentId] = useState<number | null>(null);
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const [isFirstRecharge, setIsFirstRecharge] = useState(false);
   const [checkingFirstRecharge, setCheckingFirstRecharge] = useState(true);
+  const [paymentStatus, setPaymentStatus] = useState<string>("");
 
   // 检查是否首次充值
   useEffect(() => {
@@ -55,6 +58,85 @@ function RechargeContent() {
       }
     }
   }, [searchParams]);
+
+  // 支付状态轮询
+  useEffect(() => {
+    if (!paymentId || !qrCode) {
+      return;
+    }
+
+    const pollPaymentStatus = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const response = await fetch(`/api/payments/status/${paymentId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          if (data.isCompleted) {
+            // 支付成功
+            setPaymentStatus("success");
+            safeToast.success(`支付成功！已充值 ${data.payment.pointsAdded} 积分`);
+
+            // 停止轮询
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+
+            // 2秒后关闭弹窗并刷新页面
+            setTimeout(() => {
+              setQrCode(null);
+              setPaymentId(null);
+              setPaymentStatus("");
+              router.push("/dashboard"); // 跳转到个人中心查看积分
+            }, 2000);
+          } else if (data.isFailed) {
+            // 支付失败
+            setPaymentStatus("failed");
+            safeToast.error("支付失败，请重试");
+
+            // 停止轮询
+            if (pollingInterval) {
+              clearInterval(pollingInterval);
+              setPollingInterval(null);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Poll payment status error:", err);
+      }
+    };
+
+    // 立即检查一次
+    pollPaymentStatus();
+
+    // 每3秒轮询一次
+    const interval = setInterval(pollPaymentStatus, 3000);
+    setPollingInterval(interval);
+
+    // 清理函数
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [paymentId, qrCode, router]);
+
+  // 关闭二维码弹窗时停止轮询
+  const handleCloseQrCode = () => {
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
+    }
+    setQrCode(null);
+    setPaymentId(null);
+    setPaymentStatus("");
+  };
 
   const handleInitiatePayment = async () => {
     const token = localStorage.getItem("token");
@@ -95,7 +177,8 @@ function RechargeContent() {
         return;
       }
 
-      // In production, this would be a real QR code from payment provider
+      // 保存支付ID和二维码
+      setPaymentId(data.paymentId);
       setQrCode(data.qrCode || "mock-qr-code");
       safeToast.success("支付初始化成功，请扫描二维码");
     } catch (err) {
@@ -314,23 +397,85 @@ function RechargeContent() {
                 <h3 className="text-xl font-bold mb-4 text-center">
                   {paymentMethod === "wechat" ? "微信支付" : "支付宝"}
                 </h3>
-                <div className="bg-gray-100 p-4 rounded-lg mb-4 flex items-center justify-center h-64">
-                  <div className="text-center">
-                    <p className="text-gray-600 mb-2">扫描二维码支付</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      ¥{selectedPackage?.price}
-                    </p>
+
+                {paymentStatus === "success" ? (
+                  <div className="text-center py-8">
+                    <div className="text-6xl mb-4">✅</div>
+                    <p className="text-2xl font-bold text-green-600 mb-2">支付成功！</p>
+                    <p className="text-gray-600">即将跳转到个人中心...</p>
                   </div>
-                </div>
-                <p className="text-sm text-gray-600 text-center mb-4">
-                  请使用{paymentMethod === "wechat" ? "微信" : "支付宝"}扫描上方二维码完成支付
-                </p>
-                <button
-                  onClick={() => setQrCode(null)}
-                  className="w-full btn-secondary"
-                >
-                  关闭
-                </button>
+                ) : paymentStatus === "failed" ? (
+                  <div className="text-center py-8">
+                    <div className="text-6xl mb-4">❌</div>
+                    <p className="text-2xl font-bold text-red-600 mb-2">支付失败</p>
+                    <p className="text-gray-600 mb-4">请重试或选择其他支付方式</p>
+                    <button
+                      onClick={handleCloseQrCode}
+                      className="btn-primary"
+                    >
+                      关闭
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-gray-100 p-4 rounded-lg mb-4 flex items-center justify-center">
+                      {qrCode && qrCode !== "mock-qr-code" ? (
+                        <img
+                          src={qrCode}
+                          alt="支付二维码"
+                          className="w-64 h-64"
+                        />
+                      ) : (
+                        <div className="w-64 h-64 flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-gray-600 mb-2">扫描二维码支付</p>
+                            <p className="text-2xl font-bold text-blue-600">
+                              ¥{selectedPackage?.price}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-2">
+                              (测试模式：实际生产中会显示真实二维码)
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 text-center mb-2">
+                        请使用{paymentMethod === "wechat" ? "微信" : "支付宝"}扫描二维码
+                      </p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">充值金额:</span>
+                          <span className="font-bold">¥{selectedPackage?.price}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">获得积分:</span>
+                          <span className="font-bold text-blue-600">
+                            {selectedPackage?.points}
+                            {isFirstRecharge && (
+                              <span className="text-green-600">
+                                {" "}+ {Math.floor(selectedPackage.points * 0.3)} (首充)
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <Spinner size="sm" />
+                      <p className="text-sm text-gray-500">等待支付中...</p>
+                    </div>
+
+                    <button
+                      onClick={handleCloseQrCode}
+                      className="w-full btn-secondary"
+                    >
+                      取消支付
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
