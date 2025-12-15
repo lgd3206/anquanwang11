@@ -30,10 +30,29 @@ export async function GET(request: NextRequest) {
       where.pointsCost = 0; // 筛选积分为0的资源
     }
 
-    // Get resources
+    // Get resources - 不返回敏感字段
     const resources = await prisma.resource.findMany({
       where,
-      include: { category: true },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        pointsCost: true,
+        downloads: true,
+        isNew: true,
+        createdAt: true,
+        updatedAt: true,
+        source: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            pointsCost: true,
+            description: true,
+          },
+        },
+        // 明确不返回: mainLink, password, backupLink1, backupLink2
+      },
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },

@@ -25,7 +25,26 @@ export async function GET(
 
     const resource = await prisma.resource.findUnique({
       where: { id: resourceId },
-      include: { category: true },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        pointsCost: true,
+        downloads: true,
+        isNew: true,
+        createdAt: true,
+        updatedAt: true,
+        source: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            pointsCost: true,
+            description: true,
+          },
+        },
+        // 明确不返回: mainLink, password, backupLink1, backupLink2
+      },
     });
 
     if (!resource) {
