@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
 /**
  * 管理员用户删除 API
@@ -8,6 +9,7 @@ import { PrismaClient } from "@prisma/client";
  */
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // 管理员邮箱白名单
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim()).filter(Boolean);
@@ -24,9 +26,34 @@ interface DeleteUserRequest {
  */
 export async function POST(request: NextRequest) {
   try {
-    // 权限验证
-    const email = request.headers.get("x-admin-email");
-    if (!email || !ADMIN_EMAILS.includes(email)) {
+    // JWT token 验证
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { success: false, message: "未授权，请先登录" },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    let decoded: any;
+
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return NextResponse.json(
+        { success: false, message: "Token无效或已过期" },
+        { status: 401 }
+      );
+    }
+
+    // 验证管理员权限
+    const adminUser = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { email: true, name: true },
+    });
+
+    if (!adminUser || !ADMIN_EMAILS.includes(adminUser.email)) {
       return NextResponse.json(
         { success: false, message: "权限不足，仅管理员可操作" },
         { status: 403 }
@@ -134,9 +161,34 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    // 权限验证
-    const email = request.headers.get("x-admin-email");
-    if (!email || !ADMIN_EMAILS.includes(email)) {
+    // JWT token 验证
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { success: false, message: "未授权，请先登录" },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.substring(7);
+    let decoded: any;
+
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return NextResponse.json(
+        { success: false, message: "Token无效或已过期" },
+        { status: 401 }
+      );
+    }
+
+    // 验证管理员权限
+    const adminUser = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { email: true },
+    });
+
+    if (!adminUser || !ADMIN_EMAILS.includes(adminUser.email)) {
       return NextResponse.json(
         { success: false, message: "权限不足" },
         { status: 403 }
