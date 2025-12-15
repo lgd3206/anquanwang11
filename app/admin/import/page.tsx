@@ -190,6 +190,7 @@ export default function ImportPage() {
       "检查表": { min: 1, max: 10, default: 3 },
       "注安": { min: 10, max: 50, default: 20 },
       "消防": { min: 5, max: 30, default: 15 },
+      "HAZOP/SIL/LOPA": { min: 5, max: 30, default: 15 },
     };
     return ranges[category] || { min: 1, max: 50, default: 10 };
   };
@@ -417,6 +418,7 @@ export default function ImportPage() {
                         <option value="检查表">检查表</option>
                         <option value="注安">注安</option>
                         <option value="消防">消防</option>
+                        <option value="HAZOP/SIL/LOPA">HAZOP/SIL/LOPA</option>
                       </select>
                     </div>
                     <div>

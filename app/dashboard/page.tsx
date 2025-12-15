@@ -353,6 +353,11 @@ export default function DashboardPage() {
                           <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
                           <td className="px-4 py-3 text-gray-600">消防安全相关资料</td>
                         </tr>
+                        <tr>
+                          <td className="px-4 py-3">HAZOP/SIL/LOPA</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
+                          <td className="px-4 py-3 text-gray-600">危害与可操作性分析相关资料</td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
