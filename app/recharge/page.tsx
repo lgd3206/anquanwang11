@@ -5,23 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { safeToast } from "@/lib/toast";
 import Spinner from "@/components/ui/Spinner";
-
-interface RechargePackage {
-  points: number;
-  price: number;
-  discount?: string;
-  badge?: string;
-}
-
-const packages: RechargePackage[] = [
-  { points: 50, price: 4.9, badge: "试水" },
-  { points: 100, price: 9.9 },
-  { points: 300, price: 24.9, badge: "推荐" },
-  { points: 500, price: 39.9 },
-  { points: 1000, price: 59.9, discount: "限时特惠", badge: "热销" },
-  { points: 2000, price: 99.9, discount: "立省100" },
-  { points: 5000, price: 199.9, discount: "超值", badge: "最划算" },
-];
+import { RECHARGE_PACKAGES, RechargePackage } from "@/lib/recharge-packages";
 
 function RechargeContent() {
   const router = useRouter();
@@ -65,7 +49,7 @@ function RechargeContent() {
   useEffect(() => {
     const planParam = searchParams.get("plan");
     if (planParam) {
-      const plan = packages.find((p) => p.points === parseInt(planParam));
+      const plan = RECHARGE_PACKAGES.find((p) => p.points === parseInt(planParam));
       if (plan) {
         setSelectedPackage(plan);
       }
@@ -98,8 +82,7 @@ function RechargeContent() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          points: selectedPackage.points,
-          amount: selectedPackage.price,
+          packageId: selectedPackage.id, // 使用套餐ID而不是points/amount
           paymentMethod,
         }),
       });
@@ -169,12 +152,12 @@ function RechargeContent() {
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">选择充值套餐</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {packages.map((pkg) => (
+                  {RECHARGE_PACKAGES.map((pkg) => (
                     <div
-                      key={pkg.points}
+                      key={pkg.id}
                       onClick={() => setSelectedPackage(pkg)}
                       className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        selectedPackage?.points === pkg.points
+                        selectedPackage?.id === pkg.id
                           ? "border-blue-600 bg-blue-50 shadow-md"
                           : "border-gray-200 hover:border-blue-300 hover:shadow"
                       }`}
@@ -192,11 +175,6 @@ function RechargeContent() {
                         <p className="text-lg font-bold text-gray-800 mb-1">
                           ¥{pkg.price}
                         </p>
-                        {pkg.discount && (
-                          <p className="text-xs text-red-600 font-medium">
-                            {pkg.discount}
-                          </p>
-                        )}
                         <p className="text-xs text-gray-500 mt-1">
                           ¥{(pkg.price / pkg.points).toFixed(3)}/点
                         </p>
@@ -206,7 +184,7 @@ function RechargeContent() {
                 </div>
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-sm text-blue-800 text-center">
-                    💡 充值越多越划算！5000积分套餐单价仅¥0.04/点
+                    💡 充值越多越划算！10000积分套餐单价仅¥0.05/点
                   </p>
                 </div>
               </div>
