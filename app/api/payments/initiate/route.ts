@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
-import { paymentInitSchema, validateInput } from "@/lib/validation";
 import { withRateLimit } from "@/lib/rateLimit";
+import { getPackageById, calculateFirstRechargeBonus } from "@/lib/recharge-packages";
 import pingxxClient, {
   formatAmountToCents,
   generateOrderId,
@@ -38,16 +38,34 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // 输入验证
-    const validation = validateInput(paymentInitSchema, body);
-    if (!validation.success) {
+    // 只接受套餐ID，不再信任前端传入的金额和积分
+    const { packageId, paymentMethod } = body;
+
+    if (!packageId || typeof packageId !== "string") {
       return NextResponse.json(
-        { message: validation.error },
+        { message: "无效的套餐ID" },
         { status: 400 }
       );
     }
 
-    const { points, amount, paymentMethod } = validation.data;
+    if (!paymentMethod || !["wechat", "alipay"].includes(paymentMethod)) {
+      return NextResponse.json(
+        { message: "无效的支付方式" },
+        { status: 400 }
+      );
+    }
+
+    // 从后端套餐表查找真实价格，防止篡改
+    const rechargePackage = getPackageById(packageId);
+    if (!rechargePackage) {
+      return NextResponse.json(
+        { message: "套餐不存在" },
+        { status: 400 }
+      );
+    }
+
+    // 使用服务端配置的价格和积分
+    const { points, price: amount } = rechargePackage;
 
     // 检查是否首次充值
     const paymentHistory = await prisma.payment.count({
@@ -61,7 +79,7 @@ export async function POST(request: NextRequest) {
     const isFirstRecharge = paymentHistory === 0;
 
     // 首次充值奖励：额外赠送30%积分
-    const bonusPoints = isFirstRecharge ? Math.floor(points * 0.3) : 0;
+    const bonusPoints = isFirstRecharge ? calculateFirstRechargeBonus(points) : 0;
     const totalPoints = points + bonusPoints;
 
     // Generate order ID

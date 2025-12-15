@@ -97,6 +97,18 @@ async function handleChargeSucceeded(chargeData: any) {
       );
     }
 
+    // 验证金额是否匹配（防止webhook数据被篡改）
+    if (Math.abs(amount - payment.amount) > 0.01) {
+      // 允许0.01元的误差（浮点数精度）
+      console.error(
+        `Amount mismatch: webhook=${amount}, database=${payment.amount}, transaction=${transactionId}`
+      );
+      return NextResponse.json(
+        { message: "Amount verification failed" },
+        { status: 400 }
+      );
+    }
+
     // Get user info
     const user = await prisma.user.findUnique({
       where: { id: payment.userId },
