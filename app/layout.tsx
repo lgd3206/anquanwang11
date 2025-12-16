@@ -4,8 +4,15 @@ import { Toaster } from "@/lib/toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "安全资源分享网",
-  description: "专业的安全资源分享平台",
+  title: "HSE Share - 安全资源分享网",
+  description: "专业的安全资源分享平台，汇聚海量优质 HSE 资源",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+
+
   verification: {
     google: "f9FYb8VhqPzhSraCXIllZf0E5nYGlfe2r2xMes11DVQ",
   },
