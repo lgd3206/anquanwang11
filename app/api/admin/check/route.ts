@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "@/lib/auth";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",") || [];
 
 export async function GET(request: NextRequest) {
@@ -15,11 +14,9 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    let decoded: any;
+    const decoded = verifyToken(token);
 
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
+    if (!decoded) {
       return NextResponse.json({ isAdmin: false }, { status: 401 });
     }
 

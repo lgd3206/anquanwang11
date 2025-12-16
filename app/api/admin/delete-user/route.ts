@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "@/lib/auth";
 
 /**
  * 管理员用户删除 API
@@ -9,7 +9,6 @@ import jwt from "jsonwebtoken";
  */
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // 管理员邮箱白名单
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim()).filter(Boolean);
@@ -36,11 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    let decoded: any;
+    const decoded = verifyToken(token);
 
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
+    if (!decoded) {
       return NextResponse.json(
         { success: false, message: "Token无效或已过期" },
         { status: 401 }
@@ -171,11 +168,9 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    let decoded: any;
+    const decoded = verifyToken(token);
 
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
+    if (!decoded) {
       return NextResponse.json(
         { success: false, message: "Token无效或已过期" },
         { status: 401 }

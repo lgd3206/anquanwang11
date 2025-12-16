@@ -71,6 +71,7 @@ model Download {
   pointsSpent Int
   downloadedAt DateTime @default(now())
 
+  @@unique([userId, resourceId])
   @@map("downloads")
 }
 

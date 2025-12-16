@@ -36,18 +36,14 @@ export default function ImportPage() {
         return;
       }
 
-      // 通过调用管理员API来验证权限
+      // 通过调用只读的管理员检查接口来验证权限（不污染数据库）
       try {
-        const response = await fetch("/api/resources/import", {
-          method: "POST",
+        const response = await fetch("/api/admin/check", {
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            resources: [{ title: "test", link: "https://example.com", password: "test" }],
-            importType: "text",
-          }),
         });
 
         if (response.status === 403) {
@@ -60,6 +56,13 @@ export default function ImportPage() {
           localStorage.removeItem("token");
           router.push("/login");
           setTimeout(() => alert("登录已过期，请重新登录"), 100);
+          return;
+        }
+
+        const data = await response.json();
+        if (!data.isAdmin) {
+          router.push("/dashboard");
+          setTimeout(() => alert("无权限访问此页面"), 100);
           return;
         }
 

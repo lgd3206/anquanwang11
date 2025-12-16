@@ -104,24 +104,64 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Deduct points and create download record
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: payload.userId },
-        data: { points: user.points - resource.pointsCost },
-      }),
-      prisma.download.create({
-        data: {
-          userId: payload.userId,
-          resourceId: resourceId,
-          pointsSpent: resource.pointsCost,
-        },
-      }),
-      prisma.resource.update({
-        where: { id: resourceId },
-        data: { downloads: resource.downloads + 1 },
-      }),
-    ]);
+    // Deduct points and create download record (atomic operation)
+    // Use a transaction with proper error handling for the unique constraint
+    try {
+      await prisma.$transaction([
+        // Atomically decrement user points
+        prisma.user.update({
+          where: { id: payload.userId },
+          data: {
+            points: {
+              decrement: resource.pointsCost,
+            },
+          },
+        }),
+        // Create download record (will fail if already exists due to unique constraint)
+        prisma.download.create({
+          data: {
+            userId: payload.userId,
+            resourceId: resourceId,
+            pointsSpent: resource.pointsCost,
+          },
+        }),
+        // Atomically increment download count
+        prisma.resource.update({
+          where: { id: resourceId },
+          data: {
+            downloads: {
+              increment: 1,
+            },
+          },
+        }),
+      ]);
+    } catch (error: any) {
+      // Check if error is due to unique constraint violation (already downloaded)
+      if (error.code === "P2002" && error.meta?.target?.includes("userId_resourceId")) {
+        // User has already downloaded this resource, refund the points if we somehow deducted them
+        const existingDownload = await prisma.download.findUnique({
+          where: {
+            userId_resourceId: {
+              userId: payload.userId,
+              resourceId: resourceId,
+            },
+          },
+        });
+
+        return NextResponse.json({
+          message: "您已下载过此资源，无需重复扣费",
+          download: existingDownload,
+          resource: {
+            title: resource.title,
+            mainLink: resource.mainLink,
+            password: resource.password,
+            backupLink1: resource.backupLink1,
+            backupLink2: resource.backupLink2,
+          },
+        });
+      }
+      throw error;
+    }
 
     return NextResponse.json(
       {

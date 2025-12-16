@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "@/lib/auth";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 /**
  * GET endpoint to check payment status
@@ -24,11 +23,9 @@ export async function GET(
     }
 
     const token = authHeader.substring(7);
-    let decoded: any;
+    const decoded = verifyToken(token);
 
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
+    if (!decoded) {
       return NextResponse.json(
         { message: "Token无效或已过期" },
         { status: 401 }

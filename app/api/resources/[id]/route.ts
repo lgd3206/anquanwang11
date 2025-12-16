@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "@/lib/auth";
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // 管理员邮箱列表
 const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",") || [];
@@ -76,11 +75,9 @@ export async function DELETE(
     }
 
     const token = authHeader.substring(7);
-    let decoded: any;
+    const decoded = verifyToken(token);
 
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (err) {
+    if (!decoded) {
       return NextResponse.json({ message: "Token无效或已过期" }, { status: 401 });
     }
 
