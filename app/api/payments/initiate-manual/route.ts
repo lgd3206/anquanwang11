@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
-import { withRateLimit } from "@/lib/rateLimit";
+import { withRateLimitAsync } from "@/lib/rateLimit";
 import { getPackageById, calculateFirstRechargeBonus } from "@/lib/recharge-packages";
 import prisma from "@/lib/prisma";
 
@@ -12,10 +12,10 @@ import prisma from "@/lib/prisma";
  */
 export async function POST(request: NextRequest) {
   try {
-    // 速率限制检查
-    const rateLimitResult = withRateLimit(request, "payment");
+    // 速率限制检查（使用异步版本以支持Redis在多实例环境）
+    const rateLimitResult = await withRateLimitAsync(request, "payment");
     if (!rateLimitResult.allowed) {
-      return rateLimitResult.response;
+      return rateLimitResult.response!;
     }
 
     // 检查是否启用手动支付

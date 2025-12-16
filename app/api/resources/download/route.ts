@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { downloadSchema, validateInput } from "@/lib/validation";
-import { withRateLimit } from "@/lib/rateLimit";
+import { withRateLimitAsync } from "@/lib/rateLimit";
 import prisma from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
-    // 速率限制检查
-    const rateLimitResult = withRateLimit(request, "download");
+    // 速率限制检查（使用异步版本以支持Redis在多实例环境）
+    const rateLimitResult = await withRateLimitAsync(request, "download");
     if (!rateLimitResult.allowed) {
-      return rateLimitResult.response;
+      return rateLimitResult.response!;
     }
 
     const token = getTokenFromRequest(request);

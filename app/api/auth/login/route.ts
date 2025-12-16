@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { compare } from "bcryptjs";
 import { signToken } from "@/lib/auth";
 import { loginSchema, validateInput } from "@/lib/validation";
-import { withRateLimit } from "@/lib/rateLimit";
+import { withRateLimitAsync } from "@/lib/rateLimit";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    // 速率限制检查
-    const rateLimitResult = withRateLimit(request, "login");
+    // 速率限制检查（使用异步版本以支持Redis在多实例环境）
+    const rateLimitResult = await withRateLimitAsync(request, "login");
     if (!rateLimitResult.allowed) {
-      return rateLimitResult.response;
+      return rateLimitResult.response!;
     }
 
     const body = await request.json();
