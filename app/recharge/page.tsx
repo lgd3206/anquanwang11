@@ -11,6 +11,7 @@ function RechargeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<RechargePackage | null>(null);
+  const [paymentType, setPaymentType] = useState<"auto" | "manual">("auto");
   const [paymentMethod, setPaymentMethod] = useState<"wechat" | "alipay">("wechat");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -20,6 +21,7 @@ function RechargeContent() {
   const [isFirstRecharge, setIsFirstRecharge] = useState(false);
   const [checkingFirstRecharge, setCheckingFirstRecharge] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState<string>("");
+  const [manualOrderData, setManualOrderData] = useState<any>(null);
 
   // 检查是否首次充值
   useEffect(() => {
@@ -157,14 +159,19 @@ function RechargeContent() {
     setError("");
 
     try {
-      const response = await fetch("/api/payments/initiate", {
+      // 根据支付类型选择不同的API
+      const endpoint = paymentType === "manual"
+        ? "/api/payments/initiate-manual"
+        : "/api/payments/initiate";
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          packageId: selectedPackage.id, // 使用套餐ID而不是points/amount
+          packageId: selectedPackage.id,
           paymentMethod,
         }),
       });
@@ -177,16 +184,28 @@ function RechargeContent() {
         return;
       }
 
-      // 保存支付ID和二维码
-      setPaymentId(data.paymentId);
-      setQrCode(data.qrCode || "mock-qr-code");
-      safeToast.success("支付初始化成功，请扫描二维码");
+      if (paymentType === "manual") {
+        // 手动支付：显示客服二维码
+        setManualOrderData(data);
+        safeToast.success("订单创建成功，请添加客服微信完成支付");
+      } else {
+        // 自动支付：显示支付二维码并轮询
+        setPaymentId(data.paymentId);
+        setQrCode(data.qrCode || "mock-qr-code");
+        safeToast.success("支付初始化成功，请扫描二维码");
+      }
     } catch (err) {
       setError("支付过程中出错，请重试");
       safeToast.error("支付过程中出错，请重试");
     } finally {
       setLoading(false);
     }
+  };
+
+  // 复制订单号到剪贴板
+  const copyOrderId = (orderId: string) => {
+    navigator.clipboard.writeText(orderId);
+    safeToast.success("订单号已复制到剪贴板");
   };
 
   return (
@@ -232,6 +251,44 @@ function RechargeContent() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Package Selection */}
             <div className="lg:col-span-2">
+              {/* 支付类型选择 */}
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 className="text-xl font-bold mb-4">选择支付方式</h2>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <button
+                    onClick={() => {
+                      setPaymentType("auto");
+                      setManualOrderData(null);
+                    }}
+                    className={`p-4 border-2 rounded-lg transition-all ${
+                      paymentType === "auto"
+                        ? "border-blue-600 bg-blue-50"
+                        : "border-gray-200 hover:border-blue-300"
+                    }`}
+                  >
+                    <div className="text-lg font-bold text-gray-900">在线支付</div>
+                    <div className="text-sm text-gray-600 mt-1">扫码即时到账</div>
+                    <div className="text-xs text-green-600 mt-2">推荐使用</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPaymentType("manual");
+                      setQrCode(null);
+                      setPaymentStatus("");
+                    }}
+                    className={`p-4 border-2 rounded-lg transition-all ${
+                      paymentType === "manual"
+                        ? "border-yellow-500 bg-yellow-50"
+                        : "border-gray-200 hover:border-yellow-300"
+                    }`}
+                  >
+                    <div className="text-lg font-bold text-gray-900">客服支付</div>
+                    <div className="text-sm text-gray-600 mt-1">添加微信支付</div>
+                    <div className="text-xs text-yellow-600 mt-2">人工确认</div>
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">选择充值套餐</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -476,6 +533,98 @@ function RechargeContent() {
                     </button>
                   </>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* 手动支付二维码弹窗 */}
+          {manualOrderData && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
+                <h3 className="text-xl font-bold mb-4 text-center">
+                  👋 添加客服微信支付
+                </h3>
+
+                {/* 客服微信二维码 */}
+                <div className="bg-gray-100 p-4 rounded-lg mb-4 flex justify-center">
+                  <img
+                    src={manualOrderData.customerServiceQrCode}
+                    alt="客服微信二维码"
+                    className="w-64 h-64"
+                  />
+                </div>
+
+                {/* 订单号提示 */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-gray-700 mb-3 font-medium">
+                    📋 请告知客服以下订单号：
+                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <code className="text-sm font-mono font-bold text-blue-600 break-all">
+                      {manualOrderData.orderId}
+                    </code>
+                    <button
+                      onClick={() => copyOrderId(manualOrderData.orderId)}
+                      className="px-3 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700 whitespace-nowrap transition-colors"
+                    >
+                      复制
+                    </button>
+                  </div>
+                </div>
+
+                {/* 支付信息 */}
+                <div className="mb-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">支付金额:</span>
+                    <span className="font-bold text-blue-600">
+                      ¥{manualOrderData.amount.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">获得积分:</span>
+                    <span className="font-bold text-green-600">
+                      +{manualOrderData.totalPoints}
+                    </span>
+                  </div>
+                  {manualOrderData.isFirstRecharge && (
+                    <div className="flex justify-between pt-2 border-t border-green-200">
+                      <span className="text-gray-600">🎁 首充奖励:</span>
+                      <span className="font-bold text-green-600">
+                        +{manualOrderData.bonusPoints}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 支付步骤 */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-blue-900 font-bold mb-2">📝 支付步骤：</p>
+                  <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                    <li>扫描上方二维码添加客服微信</li>
+                    <li>复制上方订单号发送给客服</li>
+                    <li>通过微信转账支付 ¥{manualOrderData.amount.toFixed(2)}</li>
+                    <li>等待客服确认（通常5-10分钟）</li>
+                  </ol>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setManualOrderData(null)}
+                    className="flex-1 btn-secondary"
+                  >
+                    已添加客服，关闭
+                  </button>
+                  <button
+                    onClick={() => copyOrderId(manualOrderData.orderId)}
+                    className="flex-1 btn-primary"
+                  >
+                    复制订单号
+                  </button>
+                </div>
+
+                <p className="text-xs text-gray-500 mt-4 text-center">
+                  💡 订单成功提交后，客服会在后台进行确认
+                </p>
               </div>
             </div>
           )}
