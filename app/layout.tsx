@@ -7,9 +7,9 @@ export const metadata: Metadata = {
   title: "HSE Share - 安全资源分享网",
   description: "专业的安全资源分享平台，汇聚海量优质 HSE 资源",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 
 
