@@ -32,13 +32,16 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
-          // 内容安全策略 - 白名单配置
+          // 内容安全策略 - 白名单配置（允许第三方库的inline脚本）
           {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' https://hcaptcha.com https://*.hcaptcha.com https://www.google-analytics.com https://www.googletagmanager.com",
-              "script-src-elem 'self' https://hcaptcha.com https://*.hcaptcha.com https://www.google-analytics.com https://www.googletagmanager.com",
+              // script-src: 允许自身脚本 + hCaptcha + Google Analytics inline脚本
+              "script-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com https://www.google-analytics.com https://www.googletagmanager.com",
+              // script-src-elem: 保留unsafe-inline用于外部脚本加载
+              "script-src-elem 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com https://www.google-analytics.com https://www.googletagmanager.com",
+              // style-src: 允许inline样式（Next.js CSS需要）和第三方库
               "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com",
               "img-src 'self' data: https: https://www.google-analytics.com https://www.googletagmanager.com",
               "font-src 'self' data: https:",
