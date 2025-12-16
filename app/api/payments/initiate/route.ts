@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { withRateLimit } from "@/lib/rateLimit";
 import { getPackageById, calculateFirstRechargeBonus } from "@/lib/recharge-packages";
 import pingxxClient, {
+import prisma from "@/lib/prisma";
   formatAmountToCents,
   generateOrderId,
 } from "@/lib/pingpp";
-
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { withRateLimit } from "@/lib/rateLimit";
 import { getPackageById, calculateFirstRechargeBonus } from "@/lib/recharge-packages";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 /**
  * 创建手动支付订单（客服微信支付）

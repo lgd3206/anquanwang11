@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { verifyToken } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",") || [];
 
 export async function GET(request: NextRequest) {

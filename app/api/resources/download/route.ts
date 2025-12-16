@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { downloadSchema, validateInput } from "@/lib/validation";
 import { withRateLimit } from "@/lib/rateLimit";
-
-const prisma = new PrismaClient();
-
+import prisma from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     // 速率限制检查

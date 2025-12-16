@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { verifyToken } from "@/lib/auth";
 import { validateInput } from "@/lib/validation";
 import { withRateLimitAsync } from "@/lib/rateLimit";
 import { z } from "zod";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // 管理员邮箱白名单
 const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",") || [];

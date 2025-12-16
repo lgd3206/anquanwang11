@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getTokenFromRequest, verifyToken } from "@/lib/auth";
 import { resourceImportSchema, validateInput } from "@/lib/validation";
 import { findDuplicates } from "@/lib/deduplication";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 // 管理员邮箱列表（生产环境应存储在数据库或环境变量中）
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "").split(",").filter(Boolean);

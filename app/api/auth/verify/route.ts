@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { isTokenExpired } from "@/lib/token";
 import { sendBonusEmail } from "@/lib/email";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 const SIGNUP_BONUS = 30; // 注册成功后赠送的积分
 

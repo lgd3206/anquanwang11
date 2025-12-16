@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
 import { registerSchema, validateInput } from "@/lib/validation";
 import { withRateLimit } from "@/lib/rateLimit";
 import { generateVerificationToken, getVerificationTokenExpiry } from "@/lib/token";
 import { sendVerificationEmail } from "@/lib/email";
 import { isDisposableEmail } from "@/lib/disposableEmail";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
