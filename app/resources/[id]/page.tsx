@@ -283,7 +283,7 @@ export default function ResourceDetailPage() {
                           <button
                             onClick={() => {
                               navigator.clipboard.writeText(downloadResult.password!);
-                              alert("已复制到剪贴板");
+                              safeToast.success("已复制到剪贴板");
                             }}
                             className="text-blue-600 hover:underline text-sm"
                           >
@@ -415,7 +415,7 @@ export default function ResourceDetailPage() {
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-300 py-8 mt-16">
         <div className="container text-center">
-          <p>&copy; 2025 安全资源分享网. 保留所有权利。</p>
+          <p>&copy; 2025 HSE Share. 保留所有权利。</p>
         </div>
       </footer>
     </div>
