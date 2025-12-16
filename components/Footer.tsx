@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img
-                src="/logo.svg"
+                src="/logo.png"
                 alt="HSE Share"
                 height={32}
                 width="auto"

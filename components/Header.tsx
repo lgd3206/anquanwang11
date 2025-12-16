@@ -79,7 +79,7 @@ export default function Header({ showSearch = false }: HeaderProps) {
           className="flex items-center gap-3 hover:opacity-80 transition"
         >
           <img
-            src="/logo.svg"
+            src="/logo.png"
             alt="HSE Share"
             height={48}
             width="auto"
