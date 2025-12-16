@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Spinner from "@/components/ui/Spinner";
 import ResourceSkeleton from "@/components/ui/ResourceSkeleton";
+import SearchHighlight from "@/components/ui/SearchHighlight";
 
 interface Category {
   id: number;
@@ -23,6 +24,7 @@ interface Resource {
   downloads: number;
   isNew: boolean;
   createdAt: string;
+  similarity?: number; // 搜索相似度得分
 }
 
 function ResourcesContent() {
@@ -39,13 +41,15 @@ function ResourcesContent() {
   const [showFreeOnly, setShowFreeOnly] = useState(
     searchParams.get("freeOnly") === "true"
   );
+  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "createdAt"); // 排序方式
   const [page, setPage] = useState(
     parseInt(searchParams.get("page") || "1")
   );
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(""); // 新增：错误状态
-  const [categoriesError, setCategoriesError] = useState(""); // 新增：分类加载错误
+  const [error, setError] = useState("");
+  const [categoriesError, setCategoriesError] = useState("");
+  const [totalResults, setTotalResults] = useState(0); // 搜索结果总数
 
   // 同步筛选条件到URL
   useEffect(() => {
@@ -54,6 +58,7 @@ function ResourcesContent() {
     if (selectedCategory) params.set("category", selectedCategory);
     if (searchQuery) params.set("search", searchQuery);
     if (showFreeOnly) params.set("freeOnly", "true");
+    if (sortBy && sortBy !== "createdAt") params.set("sortBy", sortBy); // 非默认值时才设置
     if (page > 1) params.set("page", page.toString());
 
     const queryString = params.toString();
@@ -61,7 +66,7 @@ function ResourcesContent() {
 
     // 使用 replace 而不是 push，避免污染浏览器历史
     router.replace(newUrl, { scroll: false });
-  }, [selectedCategory, searchQuery, showFreeOnly, page, router]);
+  }, [selectedCategory, searchQuery, showFreeOnly, sortBy, page, router]);
 
   // Fetch categories
   useEffect(() => {
@@ -92,7 +97,8 @@ function ResourcesContent() {
         const params = new URLSearchParams();
         if (selectedCategory) params.append("category", selectedCategory);
         if (searchQuery) params.append("search", searchQuery);
-        if (showFreeOnly) params.append("freeOnly", "true"); // 新增：免积分筛选
+        if (showFreeOnly) params.append("freeOnly", "true");
+        if (sortBy && sortBy !== "createdAt") params.append("sortBy", sortBy); // 添加排序参数
         params.append("page", page.toString());
 
         const response = await fetch(`/api/resources?${params}`);
@@ -103,6 +109,7 @@ function ResourcesContent() {
         const data = await response.json();
         setResources(data.resources);
         setTotalPages(data.pagination.pages);
+        setTotalResults(data.pagination.total); // 保存总结果数
       } catch (error) {
         console.error("Failed to fetch resources:", error);
         setError("网络错误，请检查您的连接");
@@ -111,7 +118,7 @@ function ResourcesContent() {
       }
     };
     fetchResources();
-  }, [selectedCategory, searchQuery, showFreeOnly, page]); // 添加showFreeOnly依赖
+  }, [selectedCategory, searchQuery, showFreeOnly, sortBy, page]); // 添加sortBy依赖
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,7 +221,78 @@ function ResourcesContent() {
           </form>
         </div>
 
-        {/* Resources Grid */}
+        {/* Sort Options (显示在有搜索或分类时) */}
+        {(searchQuery || selectedCategory) && !loading && resources.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium text-gray-600">排序:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setSortBy("similarity");
+                  setPage(1);
+                }}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  sortBy === "similarity"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                {searchQuery ? "相关度" : "默认"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSortBy("createdAt");
+                  setPage(1);
+                }}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  sortBy === "createdAt"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                最新
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSortBy("downloads");
+                  setPage(1);
+                }}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  sortBy === "downloads"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                热门
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSortBy("pointsCost");
+                  setPage(1);
+                }}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  sortBy === "pointsCost"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                }`}
+              >
+                积分最少
+              </button>
+            </div>
+
+            {/* Search Result Statistics */}
+            {searchQuery && (
+              <div className="mt-3 text-sm text-gray-600">
+                找到 <span className="font-bold text-blue-600">{totalResults}</span> 个与{" "}
+                <span className="font-bold">"{searchQuery}"</span> 相关的结果
+              </div>
+            )}
+          </div>
+        )}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <ResourceSkeleton count={6} />
@@ -250,22 +328,34 @@ function ResourcesContent() {
                 <div key={resource.id} className="card">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-bold text-gray-800 flex-1">
-                      {resource.title}
+                      <SearchHighlight
+                        text={resource.title}
+                        searchQuery={searchQuery}
+                      />
                     </h3>
                     {isNewResource(resource.createdAt) && (
                       <span className="badge-new ml-2">新</span>
                     )}
                   </div>
 
-                  <div className="mb-3">
+                  <div className="mb-3 flex items-center gap-2">
                     <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
                       {resource.category.name}
                     </span>
+                    {/* 显示相似度得分（仅当有搜索词时） */}
+                    {searchQuery && resource.similarity && (
+                      <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">
+                        匹配度: {Math.round((resource.similarity || 0) * 100)}%
+                      </span>
+                    )}
                   </div>
 
                   {resource.description && (
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                      {resource.description}
+                      <SearchHighlight
+                        text={resource.description}
+                        searchQuery={searchQuery}
+                      />
                     </p>
                   )}
 
