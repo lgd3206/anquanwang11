@@ -76,9 +76,18 @@ export default function Header({ showSearch = false }: HeaderProps) {
         {/* Logo */}
         <Link
           href="/"
-          className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition"
+          className="flex items-center gap-3 hover:opacity-80 transition"
         >
-          安全资源分享网
+          <img
+            src="/logo.svg"
+            alt="HSE Share"
+            height={48}
+            width="auto"
+            className="h-12 w-auto"
+          />
+          <span className="text-lg font-bold text-gray-900 hidden sm:block">
+            HSE Share
+          </span>
         </Link>
 
         {/* 桌面端导航 */}
