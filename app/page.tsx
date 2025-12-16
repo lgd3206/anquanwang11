@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Footer from '@/components/Footer';
 import Link from "next/link";
 import Header from "@/components/Header";
 import { Counter } from "@/app/components/Counter";
@@ -162,25 +163,7 @@ export default function Home() {
             </div>
           </details>
         </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-gray-300 py-8">
-        <div className="container text-center">
-          <p>&copy; 2025 安全资源分享网. 保留所有权利。</p>
-          <p className="text-sm mt-4 space-x-4">
-            <Link href="/disclaimer" className="hover:text-white transition">
-              免责声明
-            </Link>
-            <span>|</span>
-            <Link href="/privacy" className="hover:text-white transition">
-              隐私政策
-            </Link>
-            <span>|</span>
-            <span>仅供学习交流使用</span>
-          </p>
-        </div>
-      </footer>
-    </main>
+      </section>      <Footer />
+</main>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import Footer from '@/components/Footer';
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { safeToast } from "@/lib/toast";
@@ -629,15 +630,8 @@ function RechargeContent() {
             </div>
           )}
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-gray-300 py-8 mt-16">
-        <div className="container text-center">
-          <p>&copy; 2025 安全资源分享网. 保留所有权利。</p>
-        </div>
-      </footer>
-    </div>
+      </main>      <Footer />
+</div>
   );
 }
 
