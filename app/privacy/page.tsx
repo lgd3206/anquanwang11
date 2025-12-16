@@ -1,28 +1,9 @@
 import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
 
 export default function PrivacyPage() {
   return (
-    <main className="flex-1">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            安全资源分享网
-          </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link href="/" className="text-gray-700 hover:text-blue-600 transition">
-              首页
-            </Link>
-            <Link href="/resources" className="text-gray-700 hover:text-blue-600 transition">
-              资源库
-            </Link>
-            <Link href="/login" className="btn-primary">
-              登录
-            </Link>
-          </nav>
-        </div>
-      </header>
-
+    <AppLayout>
       {/* Main Content */}
       <section className="py-12 bg-gray-50">
         <div className="container max-w-4xl">
@@ -302,24 +283,6 @@ export default function PrivacyPage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-gray-300 py-8 mt-16">
-        <div className="container text-center">
-          <p>&copy; 2025 安全资源分享网. 保留所有权利。</p>
-          <p className="text-sm mt-4 space-x-4">
-            <Link href="/disclaimer" className="hover:text-white transition">
-              免责声明
-            </Link>
-            <span>|</span>
-            <Link href="/privacy" className="hover:text-white transition">
-              隐私政策
-            </Link>
-            <span>|</span>
-            <span>仅供学习交流使用</span>
-          </p>
-        </div>
-      </footer>
-    </main>
+    </AppLayout>
   );
 }
