@@ -1,13 +1,52 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- 外层蓝色框 -->
-  <path d="M 50 40 L 100 20 L 150 40 L 150 100 L 100 150 L 50 100 Z" fill="none" stroke="#1e5a96" stroke-width="8"/>
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- 背景 -->
+  <rect width="400" height="300" fill="white"/>
   
-  <!-- 内层橙色 S 形 -->
-  <path d="M 70 60 Q 100 50 120 80 Q 100 100 70 110 Q 100 120 120 150" fill="none" stroke="#f97316" stroke-width="6" stroke-linecap="round"/>
+  <!-- 主 Logo 图标 -->
+  <g transform="translate(80, 30)">
+    <!-- 蓝色盾牌形外框（左上角到右下角） -->
+    <path d="M 60 20 Q 100 0 140 20 L 150 80 Q 100 140 100 140 Q 50 80 60 80 Z" 
+          fill="none" stroke="#1e5a96" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+    
+    <!-- 橙色 S 形曲线（代表安全和改进） -->
+    <path d="M 80 60 Q 110 45 130 65 Q 110 85 70 90 Q 110 100 130 130" 
+          fill="none" stroke="#f97316" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- 绿色向上箭头（右上角） -->
+    <g transform="translate(130, 35)">
+      <path d="M 0 15 L 25 0 L 20 25 Z" fill="#22c55e"/>
+      <!-- 箭头杆 -->
+      <line x1="12.5" y1="12.5" x2="12.5" y2="35" stroke="#22c55e" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    
+    <!-- 绿色向下叶子（左下角） -->
+    <g transform="translate(65, 105)">
+      <path d="M 0 0 Q 8 -8 12 -2 Q 8 2 0 12 Z" fill="#22c55e"/>
+    </g>
+    
+    <!-- 深蓝色安全帽图标 -->
+    <g transform="translate(100, 65)">
+      <ellipse cx="0" cy="-2" rx="9" ry="14" fill="#1e5a96"/>
+      <path d="M -8 3 L 8 3 L 11 8 Q 11 12 0 14 Q -11 12 -11 8 Z" fill="#f97316"/>
+    </g>
+    
+    <!-- 绿色点缀 -->
+    <circle cx="50" cy="100" r="3" fill="#22c55e" opacity="0.6"/>
+  </g>
   
-  <!-- 绿色箭头 -->
-  <path d="M 130 50 L 150 70 L 140 80" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- 绿色叶子 -->
-  <ellipse cx="80" cy="110" rx="12" ry="20" fill="#22c55e" transform="rotate(-30 80 110)"/>
+  <!-- 品牌文字 -->
+  <g transform="translate(80, 210)">
+    <!-- "HSE" 蓝色文字 -->
+    <text x="0" y="0" font-family="'Arial', 'Helvetica', sans-serif" font-size="52" font-weight="bold" fill="#1e5a96" letter-spacing="2">
+      HSE
+    </text>
+    
+    <!-- "share" 绿色文字 -->
+    <text x="155" y="0" font-family="'Arial', 'Helvetica', sans-serif" font-size="52" font-weight="bold" fill="#22c55e">
+      share
+    </text>
+    
+    <!-- 分隔圆点 -->
+    <circle cx="145" cy="-18" r="6" fill="#f97316"/>
+  </g>
 </svg>
