@@ -144,10 +144,10 @@ function RegisterContent() {
       }
 
       // 注册成功
-      setSuccess("注册成功！正在跳转到登录页面...");
+      setSuccess("注册成功！正在跳转到验证页面...");
       safeToast.success("注册成功！请检查邮箱验证");
       setTimeout(() => {
-        router.push("/login?registered=true");
+        router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
       }, 1500);
     } catch (err) {
       setError("注册过程中出错，请重试");

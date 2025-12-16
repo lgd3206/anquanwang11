@@ -62,6 +62,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 获取用户信息
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { emailVerifiedAt: true },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { message: "用户不存在" },
+        { status: 404 }
+      );
+    }
+
+    // 检查邮箱是否已验证
+    if (!user.emailVerifiedAt) {
+      return NextResponse.json(
+        {
+          message: "请先验证邮箱以解锁充值功能",
+          unverified: true,
+        },
+        { status: 403 }
+      );
+    }
+
     // 使用服务端配置的价格和积分
     const { points, price: amount } = rechargePackage;
 

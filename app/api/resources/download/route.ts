@@ -66,6 +66,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 检查邮箱是否已验证
+    if (!user.emailVerifiedAt) {
+      return NextResponse.json(
+        {
+          message: "请先验证邮箱以解锁下载功能",
+          unverified: true,
+        },
+        { status: 403 }
+      );
+    }
+
     // Check if user has enough points
     if (user.points < resource.pointsCost) {
       return NextResponse.json(
