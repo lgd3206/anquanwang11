@@ -69,14 +69,11 @@ async function main() {
         if (resourceCount > 0) {
           console.log(`\n   正在合并 "${merge.oldName}" (${resourceCount} 个资源)`);
 
-          // 将资源转移到新分类
-          await prisma.resource.updateMany(
-            {
-              where: { categoryId: oldCategory.id }
-            },
-            {
-              categoryId: merge.newCategoryId
-            }
+          // 将资源转移到新分类（使用原始SQL）
+          await prisma.$executeRawUnsafe(
+            `UPDATE resources SET "categoryId" = $1 WHERE "categoryId" = $2`,
+            merge.newCategoryId,
+            oldCategory.id
           );
           console.log(`   ✓ 已转移 ${resourceCount} 个资源`);
         }
