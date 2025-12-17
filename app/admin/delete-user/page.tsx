@@ -27,21 +27,26 @@ export default function DeleteUserPage() {
 
   // 页面加载时获取删除历史
   useEffect(() => {
-    fetchDeleteRecords();
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetchDeleteRecords();
+    }
   }, []);
 
   // 获取删除历史
   const fetchDeleteRecords = async () => {
-    if (!adminEmail) {
-      setDeleteRecords([]);
-      return;
-    }
-
     setRecordsLoading(true);
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setMessage("未登录，请先登录");
+        setMessageType("error");
+        return;
+      }
+
       const response = await fetch("/api/admin/delete-user", {
         headers: {
-          "x-admin-email": adminEmail,
+          "Authorization": `Bearer ${token}`,
         },
       });
 
@@ -65,12 +70,6 @@ export default function DeleteUserPage() {
   const handleDeleteUser = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!adminEmail) {
-      setMessage("请输入管理员邮箱");
-      setMessageType("error");
-      return;
-    }
-
     if (!identifier) {
       setMessage("请输入用户邮箱或ID");
       setMessageType("error");
@@ -90,11 +89,19 @@ export default function DeleteUserPage() {
     setMessage("");
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setMessage("未登录，请先登录");
+        setMessageType("error");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch("/api/admin/delete-user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-email": adminEmail,
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
           identifier,
@@ -167,23 +174,6 @@ export default function DeleteUserPage() {
                 <h2 className="text-2xl font-bold text-gray-800">删除用户</h2>
 
                 <form onSubmit={handleDeleteUser} className="space-y-4">
-                  {/* 管理员邮箱 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      管理员邮箱 *
-                    </label>
-                    <input
-                      type="email"
-                      value={adminEmail}
-                      onChange={(e) => setAdminEmail(e.target.value)}
-                      placeholder="输入您的管理员邮箱"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      用于权限验证，需要在 ADMIN_EMAILS 环境变量中配置
-                    </p>
-                  </div>
-
                   {/* 标识符类型 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -290,7 +280,7 @@ export default function DeleteUserPage() {
                   {/* 提交按钮 */}
                   <button
                     type="submit"
-                    disabled={loading || !adminEmail || !identifier}
+                    disabled={loading || !identifier}
                     className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
                   >
                     {loading ? "删除中..." : "🗑️ 确认删除用户"}
@@ -336,8 +326,7 @@ export default function DeleteUserPage() {
           </div>
 
           {/* 删除历史表 */}
-          {adminEmail && (
-            <div className="mt-12 bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="mt-12 bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-6 border-b">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-bold text-gray-800">删除历史（最近100条）</h2>
@@ -392,8 +381,7 @@ export default function DeleteUserPage() {
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
       </section>
 
       {/* Footer */}
