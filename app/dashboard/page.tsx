@@ -310,44 +310,9 @@ export default function DashboardPage() {
                       </thead>
                       <tbody className="divide-y">
                         <tr>
-                          <td className="px-4 py-3">安全课件</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">5-20</td>
-                          <td className="px-4 py-3 text-gray-600">培训资料、讲座PPT</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">标准规范</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">1-15</td>
-                          <td className="px-4 py-3 text-gray-600">国家标准、行业规程</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">事故调查报告</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">1-10</td>
-                          <td className="px-4 py-3 text-gray-600">各类事故调查报告</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">事故警示视频</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">3-20</td>
-                          <td className="px-4 py-3 text-gray-600">警示教育视频</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">安全书籍</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">10-60</td>
-                          <td className="px-4 py-3 text-gray-600">专业电子书籍</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">制度规程</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">1-20</td>
-                          <td className="px-4 py-3 text-gray-600">企业制度、规程文件</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">检查表</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">1-10</td>
-                          <td className="px-4 py-3 text-gray-600">安全检查表、清单</td>
-                        </tr>
-                        <tr>
-                          <td className="px-4 py-3">注安</td>
-                          <td className="px-4 py-3 font-bold text-blue-600">10-50</td>
-                          <td className="px-4 py-3 text-gray-600">注册安全工程师资料</td>
+                          <td className="px-4 py-3">化工安全</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
+                          <td className="px-4 py-3 text-gray-600">化工生产安全相关资料</td>
                         </tr>
                         <tr>
                           <td className="px-4 py-3">消防</td>
@@ -358,6 +323,56 @@ export default function DashboardPage() {
                           <td className="px-4 py-3">HAZOP/SIL/LOPA</td>
                           <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
                           <td className="px-4 py-3 text-gray-600">危害与可操作性分析相关资料</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">应急预案</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-20</td>
+                          <td className="px-4 py-3 text-gray-600">应急预案和应急管理资料</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">职业健康</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-20</td>
+                          <td className="px-4 py-3 text-gray-600">职业卫生和员工健康资源</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">安全培训/PPT</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-20</td>
+                          <td className="px-4 py-3 text-gray-600">培训资料、讲座PPT</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">隐患排查</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-10</td>
+                          <td className="px-4 py-3 text-gray-600">隐患排查方法、检查清单</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">事故警示视频</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">3-20</td>
+                          <td className="px-4 py-3 text-gray-600">警示教育视频</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">事故调查报告</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-10</td>
+                          <td className="px-4 py-3 text-gray-600">各类事故调查报告</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">制度规程</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-20</td>
+                          <td className="px-4 py-3 text-gray-600">企业制度、规程文件</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">安全书籍</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">10-60</td>
+                          <td className="px-4 py-3 text-gray-600">专业电子书籍</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">标准规范</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">1-15</td>
+                          <td className="px-4 py-3 text-gray-600">国家标准、行业规程</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">注安</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">10-50</td>
+                          <td className="px-4 py-3 text-gray-600">注册安全工程师资料</td>
                         </tr>
                       </tbody>
                     </table>
