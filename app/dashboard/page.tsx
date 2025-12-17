@@ -5,12 +5,14 @@ import Footer from '@/components/Footer';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import DashboardSkeleton from "@/components/ui/DashboardSkeleton";
+import VerificationBanner from "@/components/VerificationBanner";
 
 interface User {
   id: number;
   email: string;
   name: string;
   points: number;
+  emailVerifiedAt: string | null;
   createdAt: string;
 }
 
@@ -184,6 +186,14 @@ export default function DashboardPage() {
       </header>
 
       <main className="container py-8">
+        {/* 邮箱验证横幅 */}
+        {user && (
+          <VerificationBanner
+            email={user.email}
+            isVerified={!!user.emailVerifiedAt}
+          />
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* User Info Card */}
           <div className="lg:col-span-1">

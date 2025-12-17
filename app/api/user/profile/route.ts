@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         email: true,
         name: true,
         points: true,
+        emailVerifiedAt: true,
         createdAt: true,
       },
     });
