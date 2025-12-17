@@ -27,6 +27,23 @@ interface Resource {
   similarity?: number; // 搜索相似度得分
 }
 
+// 定义分类显示顺序（重新整理的标签体系）
+const CATEGORY_DISPLAY_ORDER = [
+  "化工安全",
+  "消防",
+  "HAZOP/SIL/LOPA",
+  "应急预案",
+  "职业健康",
+  "安全培训/PPT",
+  "隐患排查",
+  "事故警示视频",
+  "事故调查报告",
+  "制度规程",
+  "安全书籍",
+  "标准规范",
+  "注安",
+];
+
 function ResourcesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -79,7 +96,23 @@ function ResourcesContent() {
           return;
         }
         const data = await response.json();
-        setCategories(data.categories);
+
+        // 按照定义的顺序排序分类
+        const sortedCategories = [...data.categories].sort((a, b) => {
+          const indexA = CATEGORY_DISPLAY_ORDER.indexOf(a.name);
+          const indexB = CATEGORY_DISPLAY_ORDER.indexOf(b.name);
+
+          // 如果在预定义列表中，按预定义顺序排序
+          if (indexA !== -1 && indexB !== -1) {
+            return indexA - indexB;
+          }
+          // 如果不在预定义列表中，放在末尾，保持原始顺序
+          if (indexA !== -1) return -1;
+          if (indexB !== -1) return 1;
+          return 0;
+        });
+
+        setCategories(sortedCategories);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
         setCategoriesError("网络错误，请检查您的连接");
