@@ -310,9 +310,24 @@ export default function DashboardPage() {
                       </thead>
                       <tbody className="divide-y">
                         <tr>
-                          <td className="px-4 py-3">化工安全</td>
+                          <td className="px-4 py-3">双重预防机制</td>
                           <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
-                          <td className="px-4 py-3 text-gray-600">化工生产安全相关资料</td>
+                          <td className="px-4 py-3 text-gray-600">双重预防体系相关资料</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">过程安全管理</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
+                          <td className="px-4 py-3 text-gray-600">PSM体系、14要素资料</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">重大危险源</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
+                          <td className="px-4 py-3 text-gray-600">重大危险源辨识评估资料</td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3">化工安全·危化品</td>
+                          <td className="px-4 py-3 font-bold text-blue-600">5-30</td>
+                          <td className="px-4 py-3 text-gray-600">化工生产和危化品安全资料</td>
                         </tr>
                         <tr>
                           <td className="px-4 py-3">消防</td>
@@ -340,7 +355,7 @@ export default function DashboardPage() {
                           <td className="px-4 py-3 text-gray-600">培训资料、讲座PPT</td>
                         </tr>
                         <tr>
-                          <td className="px-4 py-3">隐患排查</td>
+                          <td className="px-4 py-3">隐患排查·重大隐患</td>
                           <td className="px-4 py-3 font-bold text-blue-600">1-10</td>
                           <td className="px-4 py-3 text-gray-600">隐患排查方法、检查清单</td>
                         </tr>

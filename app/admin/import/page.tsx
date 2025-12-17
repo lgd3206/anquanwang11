@@ -181,16 +181,19 @@ export default function ImportPage() {
     });
   };
 
-  // 分类对应的推荐积分范围
+  // 分类对应的推荐积分范围（方案A：新增3个核心分类）
   const getPointsRange = (category: string) => {
     const ranges: { [key: string]: { min: number; max: number; default: number } } = {
-      "化工安全": { min: 5, max: 30, default: 10 },
+      "双重预防机制": { min: 5, max: 30, default: 10 },
+      "过程安全管理": { min: 5, max: 30, default: 15 },
+      "重大危险源": { min: 5, max: 30, default: 10 },
+      "化工安全·危化品": { min: 5, max: 30, default: 10 },
       "消防": { min: 5, max: 30, default: 15 },
       "HAZOP/SIL/LOPA": { min: 5, max: 30, default: 15 },
       "应急预案": { min: 5, max: 20, default: 10 },
       "职业健康": { min: 5, max: 20, default: 8 },
       "安全培训/PPT": { min: 5, max: 20, default: 10 },
-      "隐患排查": { min: 1, max: 10, default: 5 },
+      "隐患排查·重大隐患": { min: 1, max: 10, default: 5 },
       "事故警示视频": { min: 3, max: 20, default: 10 },
       "事故调查报告": { min: 1, max: 10, default: 5 },
       "制度规程": { min: 1, max: 20, default: 5 },
@@ -415,13 +418,16 @@ export default function ImportPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">选择分类...</option>
-                        <option value="化工安全">化工安全</option>
+                        <option value="双重预防机制">双重预防机制</option>
+                        <option value="过程安全管理">过程安全管理</option>
+                        <option value="重大危险源">重大危险源</option>
+                        <option value="化工安全·危化品">化工安全·危化品</option>
                         <option value="消防">消防</option>
                         <option value="HAZOP/SIL/LOPA">HAZOP/SIL/LOPA</option>
                         <option value="应急预案">应急预案</option>
                         <option value="职业健康">职业健康</option>
                         <option value="安全培训/PPT">安全培训/PPT</option>
-                        <option value="隐患排查">隐患排查</option>
+                        <option value="隐患排查·重大隐患">隐患排查·重大隐患</option>
                         <option value="事故警示视频">事故警示视频</option>
                         <option value="事故调查报告">事故调查报告</option>
                         <option value="制度规程">制度规程</option>
