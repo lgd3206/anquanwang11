@@ -43,10 +43,14 @@ const nextConfig: NextConfig = {
               "script-src-elem 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com https://www.google-analytics.com https://www.googletagmanager.com",
               // style-src: 允许inline样式（Next.js CSS需要）和第三方库
               "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com",
+              // img-src: 允许图片从网盘加载
               "img-src 'self' data: https: https://www.google-analytics.com https://www.googletagmanager.com",
+              // media-src: 允许视频和音频从网盘加载（支持百度网盘、夸克网盘等）
+              "media-src 'self' https://pan.baidu.com https://d.pcs.baidu.com https://pan.quark.cn https://api.quark.cn https:",
               "font-src 'self' data: https:",
               "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com https://www.google-analytics.com https://www.googletagmanager.com https://ping.alipay.com",
-              "frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com",
+              // frame-src: 允许iframe从网盘加载（虽然网盘通常禁止iframe，但保留以备不时之需）
+              "frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com https://pan.baidu.com https://pan.quark.cn",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
