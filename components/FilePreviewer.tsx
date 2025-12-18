@@ -149,13 +149,12 @@ export default function FilePreviewer({
             className={`max-w-full max-h-full object-contain select-none ${
               !imageLoaded ? "hidden" : ""
             }`}
-            crossOrigin="anonymous"
             onLoad={() => {
               setImageLoaded(true);
               setLoading(false);
             }}
             onError={() => {
-              const errorMsg = "图片加载失败，可能是网络连接问题或网盘限制";
+              const errorMsg = "图片加载失败";
               setError(errorMsg);
               setLoading(false);
               onError?.(errorMsg);
@@ -176,13 +175,12 @@ export default function FilePreviewer({
           controls
           className={`max-w-full max-h-full ${!videoLoaded ? "hidden" : ""}`}
           controlsList="nodownload"
-          crossOrigin="anonymous"
           onLoadedData={() => {
             setVideoLoaded(true);
             setLoading(false);
           }}
           onError={() => {
-            const errorMsg = "视频加载失败，可能是网络连接问题或网盘限制";
+            const errorMsg = "视频加载失败";
             setError(errorMsg);
             setLoading(false);
             onError?.(errorMsg);

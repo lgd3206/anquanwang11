@@ -38,7 +38,7 @@ export default function PreviewModal({
       setPreviewError("");
 
       try {
-        // 先获取预览元数据
+        // 获取预览元数据
         const response = await fetch(`/api/resources/${resourceId}/preview`);
 
         if (!response.ok) {
@@ -49,27 +49,7 @@ export default function PreviewModal({
         }
 
         const data = await response.json();
-        let previewData = data.resource;
-
-        // 再获取预览内容信息（包含预览URL）
-        try {
-          const contentResponse = await fetch(
-            `/api/resources/${resourceId}/preview-content`
-          );
-          if (contentResponse.ok) {
-            const contentData = await contentResponse.json();
-            // 合并预览URL信息
-            previewData = {
-              ...previewData,
-              previewUrl: contentData.previewContent?.previewUrl,
-            };
-          }
-        } catch (err) {
-          console.warn("Failed to fetch preview content info:", err);
-          // 继续使用基本的预览数据
-        }
-
-        setPreviewData(previewData);
+        setPreviewData(data.resource);
         setLoading(false);
       } catch (err) {
         console.error("Preview fetch error:", err);
@@ -160,24 +140,24 @@ export default function PreviewModal({
               )}
 
               {/* 文件预览组件 */}
-              {!previewError && previewData?.previewUrl && (
+              {!previewError && (
                 <FilePreviewer
                   fileType={previewData.fileType}
-                  fileUrl={previewData.previewUrl}
+                  fileUrl={`/api/resources/${resourceId}/preview-content`}
                   fileName={previewData.title}
                   onError={handlePreviewError}
                 />
               )}
 
-              {/* 如果没有previewUrl则显示提示 */}
-              {!previewError && !previewData?.previewUrl && (
+              {/* 如果出错则显示提示 */}
+              {previewError && (
                 <div className="h-full flex flex-col items-center justify-center p-8">
                   <div className="text-6xl mb-4">⚠️</div>
                   <p className="text-xl font-bold text-gray-800 mb-2">
-                    预览链接获取失败
+                    预览加载失败
                   </p>
                   <p className="text-sm text-gray-600 mb-4">
-                    网盘链接可能已失效，请返回重试或联系管理员
+                    {previewError}
                   </p>
                 </div>
               )}
