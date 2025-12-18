@@ -89,12 +89,6 @@ export default function PreviewModal({
     setIframeError(false);
   };
 
-  const openInNewWindow = () => {
-    if (previewData) {
-      window.open(previewData.previewUrl, "_blank");
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col">
@@ -157,26 +151,25 @@ export default function PreviewModal({
 
               {iframeError && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
-                  <div className="text-6xl mb-4">⚠️</div>
+                  <div className="text-6xl mb-4">🚀</div>
                   <p className="text-xl font-bold text-gray-800 mb-2">
-                    预览加载失败
+                    完整预览功能开发中
                   </p>
                   <p className="text-sm text-gray-600 mb-6 text-center max-w-md">
-                    由于安全限制，无法在当前页面预览网盘内容。
+                    我们正在为您开发更加安全和完善的预览功能。
                     <br />
-                    请点击下方按钮在新窗口中打开预览。
+                    敬请期待！
                   </p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={openInNewWindow}
-                      className="btn-primary"
-                    >
-                      在新窗口打开预览
-                    </button>
-                    <button onClick={onClose} className="btn-secondary">
-                      关闭
-                    </button>
+                  <div className="text-center mb-6">
+                    <p className="text-xs text-gray-500">
+                      ✨ 即将支持 PDF、Word、PPT、图片、视频等多种格式预览
+                      <br />
+                      ✨ 安全、流畅的预览体验
+                    </p>
                   </div>
+                  <button onClick={onClose} className="btn-secondary">
+                    关闭
+                  </button>
                 </div>
               )}
 
