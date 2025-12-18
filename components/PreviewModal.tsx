@@ -29,12 +29,14 @@ export default function PreviewModal({
   const [error, setError] = useState("");
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [iframeError, setIframeError] = useState(false);
+  const [iframeLoading, setIframeLoading] = useState(true);
 
   useEffect(() => {
     const fetchPreview = async () => {
       setLoading(true);
       setError("");
       setIframeError(false);
+      setIframeLoading(true);
 
       try {
         const response = await fetch(`/api/resources/${resourceId}/preview`);
@@ -42,15 +44,23 @@ export default function PreviewModal({
         if (!response.ok) {
           const data = await response.json();
           setError(data.message || "加载预览失败");
+          setLoading(false);
           return;
         }
 
         const data = await response.json();
         setPreviewData(data.resource);
+
+        // 设置超时检测：如果10秒内iframe没有加载成功，认为失败
+        const timeoutId = setTimeout(() => {
+          setIframeError(true);
+          setIframeLoading(false);
+        }, 10000);
+
+        setLoading(false);
       } catch (err) {
         console.error("Preview fetch error:", err);
         setError("网络错误，请稍后重试");
-      } finally {
         setLoading(false);
       }
     };
@@ -70,7 +80,13 @@ export default function PreviewModal({
 
   const handleIframeError = () => {
     setIframeError(true);
+    setIframeLoading(false);
     console.warn("iframe加载失败，可能是CSP限制或链接无效");
+  };
+
+  const handleIframeLoad = () => {
+    setIframeLoading(false);
+    setIframeError(false);
   };
 
   const openInNewWindow = () => {
@@ -121,32 +137,14 @@ export default function PreviewModal({
                 关闭
               </button>
             </div>
-          ) : iframeError ? (
-            // iframe加载失败时显示备选方案
-            <div className="h-full flex flex-col items-center justify-center p-8 bg-white">
-              <div className="text-6xl mb-4">⚠️</div>
-              <p className="text-xl font-bold text-gray-800 mb-2">
-                预览加载失败
-              </p>
-              <p className="text-sm text-gray-600 mb-6 text-center max-w-md">
-                由于安全限制，无法在当前页面预览网盘内容。
-                <br />
-                请点击下方按钮在新窗口中打开预览。
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={openInNewWindow}
-                  className="btn-primary"
-                >
-                  在新窗口打开预览
-                </button>
-                <button onClick={onClose} className="btn-secondary">
-                  关闭
-                </button>
-              </div>
-            </div>
           ) : previewData ? (
             <>
+              {iframeLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                  <Spinner size="lg" />
+                </div>
+              )}
+
               {/* iframe预览 */}
               <iframe
                 src={previewData.previewUrl}
@@ -154,12 +152,40 @@ export default function PreviewModal({
                 title={`预览: ${previewData.title}`}
                 sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
                 onError={handleIframeError}
+                onLoad={handleIframeLoad}
               />
 
+              {iframeError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
+                  <div className="text-6xl mb-4">⚠️</div>
+                  <p className="text-xl font-bold text-gray-800 mb-2">
+                    预览加载失败
+                  </p>
+                  <p className="text-sm text-gray-600 mb-6 text-center max-w-md">
+                    由于安全限制，无法在当前页面预览网盘内容。
+                    <br />
+                    请点击下方按钮在新窗口中打开预览。
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={openInNewWindow}
+                      className="btn-primary"
+                    >
+                      在新窗口打开预览
+                    </button>
+                    <button onClick={onClose} className="btn-secondary">
+                      关闭
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* 提示信息 */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm whitespace-nowrap pointer-events-none">
-                💡 预览完全免费，不消耗积分
-              </div>
+              {!iframeError && !iframeLoading && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm whitespace-nowrap pointer-events-none">
+                  💡 预览完全免费，不消耗积分
+                </div>
+              )}
             </>
           ) : null}
         </div>
