@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Spinner from "./ui/Spinner";
+import FilePreviewer from "./FilePreviewer";
 
 interface PreviewModalProps {
   resourceId: number;
@@ -14,7 +15,6 @@ interface PreviewData {
   title: string;
   fileType: string;
   previewable: boolean;
-  previewUrl: string;
   source: string;
   description: string;
   category: string;
@@ -28,15 +28,13 @@ export default function PreviewModal({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
-  const [iframeError, setIframeError] = useState(false);
-  const [iframeLoading, setIframeLoading] = useState(true);
+  const [previewError, setPreviewError] = useState("");
 
   useEffect(() => {
     const fetchPreview = async () => {
       setLoading(true);
       setError("");
-      setIframeError(false);
-      setIframeLoading(true);
+      setPreviewError("");
 
       try {
         const response = await fetch(`/api/resources/${resourceId}/preview`);
@@ -50,13 +48,6 @@ export default function PreviewModal({
 
         const data = await response.json();
         setPreviewData(data.resource);
-
-        // 设置超时检测：如果10秒内iframe没有加载成功，认为失败
-        const timeoutId = setTimeout(() => {
-          setIframeError(true);
-          setIframeLoading(false);
-        }, 10000);
-
         setLoading(false);
       } catch (err) {
         console.error("Preview fetch error:", err);
@@ -78,15 +69,8 @@ export default function PreviewModal({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [resourceId, onClose]);
 
-  const handleIframeError = () => {
-    setIframeError(true);
-    setIframeLoading(false);
-    console.warn("iframe加载失败，可能是CSP限制或链接无效");
-  };
-
-  const handleIframeLoad = () => {
-    setIframeLoading(false);
-    setIframeError(false);
+  const handlePreviewError = (errorMsg: string) => {
+    setPreviewError(errorMsg);
   };
 
   return (
@@ -125,7 +109,7 @@ export default function PreviewModal({
               <div className="text-6xl mb-4">😢</div>
               <p className="text-xl font-bold text-gray-800 mb-2">{error}</p>
               <p className="text-sm text-gray-600 mb-4">
-                预览功能需要网盘分享链接有效且可访问
+                预览功能需要资源分享链接有效且可访问
               </p>
               <button onClick={onClose} className="btn-primary">
                 关闭
@@ -133,38 +117,18 @@ export default function PreviewModal({
             </div>
           ) : previewData ? (
             <>
-              {iframeLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                  <Spinner size="lg" />
-                </div>
-              )}
-
-              {/* iframe预览 */}
-              <iframe
-                src={previewData.previewUrl}
-                className="w-full h-full border-0"
-                title={`预览: ${previewData.title}`}
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
-                onError={handleIframeError}
-                onLoad={handleIframeLoad}
-              />
-
-              {iframeError && (
+              {previewError && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20">
-                  <div className="text-6xl mb-4">🚀</div>
+                  <div className="text-6xl mb-4">⚠️</div>
                   <p className="text-xl font-bold text-gray-800 mb-2">
-                    完整预览功能开发中
+                    预览加载失败
                   </p>
                   <p className="text-sm text-gray-600 mb-6 text-center max-w-md">
-                    我们正在为您开发更加安全和完善的预览功能。
-                    <br />
-                    敬请期待！
+                    {previewError}
                   </p>
                   <div className="text-center mb-6">
                     <p className="text-xs text-gray-500">
-                      ✨ 即将支持 PDF、Word、PPT、图片、视频等多种格式预览
-                      <br />
-                      ✨ 安全、流畅的预览体验
+                      💡 请稍后重试或点击"关闭"
                     </p>
                   </div>
                   <button onClick={onClose} className="btn-secondary">
@@ -173,8 +137,18 @@ export default function PreviewModal({
                 </div>
               )}
 
+              {/* 文件预览组件 */}
+              {!previewError && (
+                <FilePreviewer
+                  fileType={previewData.fileType}
+                  fileUrl={`/api/resources/${resourceId}/preview-content`}
+                  fileName={previewData.title}
+                  onError={handlePreviewError}
+                />
+              )}
+
               {/* 提示信息 */}
-              {!iframeError && !iframeLoading && (
+              {!previewError && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm whitespace-nowrap pointer-events-none">
                   💡 预览完全免费，不消耗积分
                 </div>
@@ -184,7 +158,7 @@ export default function PreviewModal({
         </div>
 
         {/* 底部操作栏 */}
-        {previewData && !loading && !error && !iframeError && (
+        {previewData && !loading && !error && !previewError && (
           <div className="px-6 py-4 border-t bg-gray-50 flex justify-between items-center">
             <div className="text-sm text-gray-600 truncate flex-1 mr-4">
               {previewData.description || `${previewData.fileType?.toUpperCase() || ''}文件 - ${previewData.category}`}
@@ -198,4 +172,3 @@ export default function PreviewModal({
     </div>
   );
 }
-
