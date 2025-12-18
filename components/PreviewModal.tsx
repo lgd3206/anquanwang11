@@ -28,11 +28,13 @@ export default function PreviewModal({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
+  const [iframeError, setIframeError] = useState(false);
 
   useEffect(() => {
     const fetchPreview = async () => {
       setLoading(true);
       setError("");
+      setIframeError(false);
 
       try {
         const response = await fetch(`/api/resources/${resourceId}/preview`);
@@ -66,6 +68,17 @@ export default function PreviewModal({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [resourceId, onClose]);
 
+  const handleIframeError = () => {
+    setIframeError(true);
+    console.warn("iframe加载失败，可能是CSP限制或链接无效");
+  };
+
+  const openInNewWindow = () => {
+    if (previewData) {
+      window.open(previewData.previewUrl, "_blank");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col">
@@ -92,7 +105,7 @@ export default function PreviewModal({
         </div>
 
         {/* 内容区域 */}
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-hidden relative bg-gray-100">
           {loading ? (
             <div className="h-full flex items-center justify-center">
               <Spinner size="lg" />
@@ -108,6 +121,30 @@ export default function PreviewModal({
                 关闭
               </button>
             </div>
+          ) : iframeError ? (
+            // iframe加载失败时显示备选方案
+            <div className="h-full flex flex-col items-center justify-center p-8 bg-white">
+              <div className="text-6xl mb-4">⚠️</div>
+              <p className="text-xl font-bold text-gray-800 mb-2">
+                预览加载失败
+              </p>
+              <p className="text-sm text-gray-600 mb-6 text-center max-w-md">
+                由于安全限制，无法在当前页面预览网盘内容。
+                <br />
+                请点击下方按钮在新窗口中打开预览。
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={openInNewWindow}
+                  className="btn-primary"
+                >
+                  在新窗口打开预览
+                </button>
+                <button onClick={onClose} className="btn-secondary">
+                  关闭
+                </button>
+              </div>
+            </div>
           ) : previewData ? (
             <>
               {/* iframe预览 */}
@@ -116,6 +153,7 @@ export default function PreviewModal({
                 className="w-full h-full border-0"
                 title={`预览: ${previewData.title}`}
                 sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
+                onError={handleIframeError}
               />
 
               {/* 提示信息 */}
@@ -127,7 +165,7 @@ export default function PreviewModal({
         </div>
 
         {/* 底部操作栏 */}
-        {previewData && !loading && !error && (
+        {previewData && !loading && !error && !iframeError && (
           <div className="px-6 py-4 border-t bg-gray-50 flex justify-between items-center">
             <div className="text-sm text-gray-600 truncate flex-1 mr-4">
               {previewData.description || `${previewData.fileType?.toUpperCase() || ''}文件 - ${previewData.category}`}
@@ -141,3 +179,4 @@ export default function PreviewModal({
     </div>
   );
 }
+
