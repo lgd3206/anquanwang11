@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/Header";
 import Spinner from "@/components/ui/Spinner";
+import PreviewButton from "@/components/PreviewButton";
 import { safeToast } from "@/lib/toast";
 
 interface Resource {
@@ -364,6 +365,18 @@ export default function ResourceDetailPage() {
                   )}
                 </div>
               )}
+
+              {/* 预览按钮 */}
+              <PreviewButton
+                resourceId={resource.id}
+                resourceTitle={resource.title}
+                variant="detail"
+              />
+
+              {/* 分隔提示 */}
+              <div className="my-3 text-center text-sm text-gray-500">
+                或
+              </div>
 
               {!downloadResult ? (
                 <button

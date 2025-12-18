@@ -25,6 +25,7 @@ model User {
 
   downloads Download[]
   payments  Payment[]
+  previews  Preview[]
 
   @@map("users")
 }
@@ -54,10 +55,17 @@ model Resource {
   pointsCost  Int     @default(10)
   downloads   Int     @default(0)
   isNew       Boolean @default(true)
+
+  // 预览功能相关字段
+  fileType    String? // 'pdf', 'doc', 'xls', 'ppt', 'image', 'video', 'other'
+  fileSize    String? // 文件大小（可选）
+  previewable Boolean @default(true) // 是否支持预览
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   downloadRecords Download[]
+  previewRecords  Preview[]
 
   @@map("resources")
 }
@@ -99,4 +107,17 @@ model ImportLog {
   createdAt    DateTime @default(now())
 
   @@map("import_logs")
+}
+
+model Preview {
+  id          Int      @id @default(autoincrement())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      Int?     // 可为空，支持未登录用户预览
+  resource    Resource @relation(fields: [resourceId], references: [id])
+  resourceId  Int
+  previewedAt DateTime @default(now())
+
+  @@index([resourceId])
+  @@index([userId])
+  @@map("previews")
 }
